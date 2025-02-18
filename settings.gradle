@@ -1,0 +1,9 @@
+rootProject.name = 'NMS'
+
+file('nms').listFiles()?.each { dir ->
+    if (dir.isDirectory()) {
+        include ":nms:${dir.name}"
+    }
+}
+include ':version_interface'
+

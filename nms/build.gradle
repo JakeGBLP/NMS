@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'io.github.patrick.remapper' version '1.4.2' apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.github.patrick.remapper'
+
+    def minecraftVersion = project.name
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven { url 'https://oss.sonatype.org/content/groups/public/' }
+    }
+
+    dependencies {
+        implementation('org.jetbrains:annotations:20.1.0')
+        implementation(project(":version_interface"))
+        compileOnly "org.spigotmc:spigot:$minecraftVersion-R0.1-SNAPSHOT:remapped-mojang"
+    }
+
+    tasks {
+        remap {
+            version.set(minecraftVersion)
+        }
+    }
+
+    build {
+        dependsOn tasks.remap
+    }
+}

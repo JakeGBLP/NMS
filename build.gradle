@@ -1,0 +1,81 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.0'
+}
+
+group = 'it.jakegblp'
+version = '1.0.0'
+
+def oldestJava = 16
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
+
+    project(':nms').subprojects.each { subproject ->
+        implementation project(subproject.path)
+    }
+}
+
+
+allprojects {
+    apply plugin: 'java'
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation','-source', oldestJava, '-target', oldestJava]
+    }
+
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url "https://jitpack.io/" }
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'}
+        maven { url 'https://oss.sonatype.org/content/groups/public/' }
+    }
+
+    dependencies {
+        implementation 'com.github.zafarkhaja:java-semver:0.10.2'
+        compileOnly 'org.jetbrains:annotations:20.1.0'
+
+        compileOnly 'org.projectlombok:lombok:1.18.36'
+        annotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+        testCompileOnly 'org.projectlombok:lombok:1.18.36'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+    }
+
+    shadowJar {
+        dependencies {
+            exclude(dependency('org.projectlombok:lombok'))
+            exclude(dependency('org.jetbrains:annotations'))
+        }
+        archiveClassifier.set("")
+    }
+
+    build {
+        dependsOn shadowJar
+    }
+}
+
+processResources {
+    filteringCharset = 'UTF-8'
+    filter(ReplaceTokens, tokens: [version: version])
+}
+
+
+build {
+    doLast {
+        subprojects.each { subproject ->
+            subproject.tasks.matching { it.name == "build" }.configureEach {
+                doLast {
+                    delete subproject.layout.buildDirectory
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,5 @@
+name: NMS
+version: '1.0.0'
+main: it.jakegblp.nms.api.NMS
+api-version: '1.17'
+authors: [ JakeGBLP ]
