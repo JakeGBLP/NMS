@@ -12,8 +12,8 @@ subprojects {
     repositories {
         mavenCentral()
         mavenLocal()
-        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        maven { url 'https://oss.sonatype.org/content/groups/public/' }
+        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven { url = 'https://oss.sonatype.org/content/groups/public/' }
     }
 
     dependencies {
@@ -24,7 +24,7 @@ subprojects {
 
     tasks {
         remap {
-            version.set(minecraftVersion)
+            setVersion(minecraftVersion)
         }
     }
 

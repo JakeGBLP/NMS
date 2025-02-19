@@ -18,13 +18,12 @@ dependencies {
     }
 }
 
-
 allprojects {
     apply plugin: 'java'
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
-        options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation','-source', oldestJava, '-target', oldestJava]
+        options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation', '-source', oldestJava, '-target', oldestJava]
     }
 
     java {
@@ -33,9 +32,9 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven { url "https://jitpack.io/" }
-        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'}
-        maven { url 'https://oss.sonatype.org/content/groups/public/' }
+        maven { url = "https://jitpack.io/" }
+        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven { url = 'https://oss.sonatype.org/content/groups/public/' }
     }
 
     dependencies {
