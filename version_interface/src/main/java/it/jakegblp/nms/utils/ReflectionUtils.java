@@ -50,8 +50,7 @@ public interface ReflectionUtils {
 
     static Method getDeclaredMethodSafely(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
-            Method method = clazz.getDeclaredMethod(name, parameterTypes);
-            return method;
+            return clazz.getDeclaredMethod(name, parameterTypes);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             return null;
