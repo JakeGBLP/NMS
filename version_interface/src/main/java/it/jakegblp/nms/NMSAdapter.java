@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 
 import static it.jakegblp.nms.utils.ReflectionUtils.*;
@@ -22,21 +23,25 @@ public abstract class NMSAdapter<
         ClientboundAddEntityPacket
         > {
 
+    public final Map<String, Class<?>> CACHED_CLASSES = new HashMap<>();
+    public final Map<String, Method> CACHED_METHODS = new HashMap<>();
+    public final Map<String, Field> CACHED_FIELDS = new HashMap<>();
+
     public final Version MINECRAFT_VERSION = Version.parse(Bukkit.getBukkitVersion().split("-")[0]);
     public final ObfuscationMap obfuscationMap = forVersion(MINECRAFT_VERSION.toString());
     public final String CRAFTBUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
     @NotNull
     @SuppressWarnings("ConstantConditions")
-    public final Class<?> CRAFT_PLAYER_CLASS = forName(CRAFTBUKKIT_PACKAGE + ".entity.CraftPlayer");
+    public final Class<?> CRAFT_PLAYER_CLASS = forNameSafely(CRAFTBUKKIT_PACKAGE + ".entity.CraftPlayer");
     @NotNull
     @SuppressWarnings("ConstantConditions")
-    public final Class<?> SERVER_PLAYER_CLASS = forName("net.minecraft.server.level.EntityPlayer");
-    public final Class<?> SERVER_GAME_PACKET_LISTENER_IMPL_CLASS = forName("net.minecraft.server.network.PlayerConnection");
+    public final Class<?> SERVER_PLAYER_CLASS = forNameSafely("net.minecraft.server.level.EntityPlayer");
+    public final Class<?> SERVER_GAME_PACKET_LISTENER_IMPL_CLASS = forNameSafely("net.minecraft.server.network.PlayerConnection");
     @SuppressWarnings("ConstantConditions")
-    public final Method CRAFT_PLAYER_GET_HANDLE_METHOD = getMethod(CRAFT_PLAYER_CLASS, "getHandle");
+    public final Method CRAFT_PLAYER_GET_HANDLE_METHOD = getMethodSafely(CRAFT_PLAYER_CLASS, "getHandle");
     @SuppressWarnings("ConstantConditions")
-    public final Method SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD = getDeclaredMethod(SERVER_GAME_PACKET_LISTENER_IMPL_CLASS, "b");
-    public final Field SERVER_PLAYER_CONNECTION_FIELD = getField(CRAFT_PLAYER_CLASS, "connection");
+    public final Method SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD = getDeclaredMethodSafely(SERVER_GAME_PACKET_LISTENER_IMPL_CLASS, "b");
+    public final Field SERVER_PLAYER_CONNECTION_FIELD = getFieldSafely(CRAFT_PLAYER_CLASS, "connection");
 
     public record ObfuscationMap(
             String playerPacketListenerFieldName,
@@ -67,7 +72,7 @@ public abstract class NMSAdapter<
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     public NMSServerPlayer getServerPlayer(Player player) {
-        return (NMSServerPlayer) invoke(CRAFT_PLAYER_GET_HANDLE_METHOD, CRAFT_PLAYER_CLASS.cast(player));
+        return (NMSServerPlayer) invokeSafely(CRAFT_PLAYER_GET_HANDLE_METHOD, CRAFT_PLAYER_CLASS.cast(player));
     }
 
     @Getter
@@ -81,7 +86,7 @@ public abstract class NMSAdapter<
 
         @SuppressWarnings("ConstantConditions")
         public void sendPacket(Packet packet) {
-            invoke(SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD, getFieldValue(SERVER_PLAYER_CONNECTION_FIELD, getServerPlayer()), packet);
+            invokeSafely(SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD, getFieldValueSafely(SERVER_PLAYER_CONNECTION_FIELD, getServerPlayer()), packet);
         }
     }
 }

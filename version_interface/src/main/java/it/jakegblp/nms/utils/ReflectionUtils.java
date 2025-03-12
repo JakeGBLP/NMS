@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public interface ReflectionUtils {
-    static Class<?> forName(String name) {
+    static Class<?> forNameSafely(String name) {
         try {
             return Class.forName(name);
         } catch (ClassNotFoundException e) {
@@ -14,7 +14,7 @@ public interface ReflectionUtils {
         }
     }
 
-    static Method getMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
+    static Method getMethodSafely(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
             return clazz.getMethod(name, parameterTypes);
         } catch (NoSuchMethodException e) {
@@ -23,7 +23,7 @@ public interface ReflectionUtils {
         }
     }
 
-    static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
+    static Method getDeclaredMethodSafely(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
             return clazz.getDeclaredMethod(name, parameterTypes);
         } catch (NoSuchMethodException e) {
@@ -32,7 +32,7 @@ public interface ReflectionUtils {
         }
     }
 
-    static Field getField(Class<?> clazz, String name) {
+    static Field getFieldSafely(Class<?> clazz, String name) {
         try {
             return clazz.getField(name);
         } catch (NoSuchFieldException e) {
@@ -41,7 +41,7 @@ public interface ReflectionUtils {
         }
     }
 
-    static Object invoke(Method method, Object object, Object... args) {
+    static Object invokeSafely(Method method, Object object, Object... args) {
         try {
             return method.invoke(object, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -50,7 +50,7 @@ public interface ReflectionUtils {
         }
     }
 
-    static Object getFieldValue(Field field, Object object) {
+    static Object getFieldValueSafely(Field field, Object object) {
         try {
             return field.get(object);
         } catch (IllegalAccessException e) {

@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public class NMS extends JavaPlugin {
 
+    @Getter
     private static NMS instance;
     private Version serverVersion;
 
