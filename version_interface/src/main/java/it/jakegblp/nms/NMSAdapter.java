@@ -36,7 +36,7 @@ public abstract class NMSAdapter<
     public final Method CRAFT_PLAYER_GET_HANDLE_METHOD = getMethod(CRAFT_PLAYER_CLASS, "getHandle");
     @SuppressWarnings("ConstantConditions")
     public final Method SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD = getDeclaredMethod(SERVER_GAME_PACKET_LISTENER_IMPL_CLASS, "b");
-    public final Field SERVER_PLAYER_CONNECTION_FIELD = getField(CRAFT_PLAYER_CLASS, "connection"); // todo: next thing to do is make sure both this field and the method above use the correct obfuscated method/field, see below
+    public final Field SERVER_PLAYER_CONNECTION_FIELD = getField(CRAFT_PLAYER_CLASS, "connection");
 
     public record ObfuscationMap(
             String playerPacketListenerFieldName,
