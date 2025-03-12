@@ -1,15 +1,13 @@
 package it.jakegblp.nms;
 
+import it.jakegblp.nms.packets.EntitySpawnPacket;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
+import static it.jakegblp.nms.utils.CraftBukkitUtils.getCraftBukkitClass;
 import static it.jakegblp.nms.utils.ReflectionUtils.*;
 
 @Getter
@@ -19,29 +17,12 @@ public abstract class NMSAdapter<
         NMSLivingEntity extends NMSEntity,
         NMSPlayer extends NMSLivingEntity,
         NMSServerPlayer extends NMSPlayer,
-        Packet,
-        ClientboundAddEntityPacket
+        NMSPacket,
+        NMSEntitySpawnPacket extends NMSPacket
         > {
-
-    public final Map<String, Class<?>> CACHED_CLASSES = new HashMap<>();
-    public final Map<String, Method> CACHED_METHODS = new HashMap<>();
-    public final Map<String, Field> CACHED_FIELDS = new HashMap<>();
 
     public final Version MINECRAFT_VERSION = Version.parse(Bukkit.getBukkitVersion().split("-")[0]);
     public final ObfuscationMap obfuscationMap = forVersion(MINECRAFT_VERSION.toString());
-    public final String CRAFTBUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
-    @NotNull
-    @SuppressWarnings("ConstantConditions")
-    public final Class<?> CRAFT_PLAYER_CLASS = forNameSafely(CRAFTBUKKIT_PACKAGE + ".entity.CraftPlayer");
-    @NotNull
-    @SuppressWarnings("ConstantConditions")
-    public final Class<?> SERVER_PLAYER_CLASS = forNameSafely("net.minecraft.server.level.EntityPlayer");
-    public final Class<?> SERVER_GAME_PACKET_LISTENER_IMPL_CLASS = forNameSafely("net.minecraft.server.network.PlayerConnection");
-    @SuppressWarnings("ConstantConditions")
-    public final Method CRAFT_PLAYER_GET_HANDLE_METHOD = getMethodSafely(CRAFT_PLAYER_CLASS, "getHandle");
-    @SuppressWarnings("ConstantConditions")
-    public final Method SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD = getDeclaredMethodSafely(SERVER_GAME_PACKET_LISTENER_IMPL_CLASS, "b");
-    public final Field SERVER_PLAYER_CONNECTION_FIELD = getFieldSafely(CRAFT_PLAYER_CLASS, "connection");
 
     public record ObfuscationMap(
             String playerPacketListenerFieldName,
@@ -71,9 +52,13 @@ public abstract class NMSAdapter<
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
-    public NMSServerPlayer getServerPlayer(Player player) {
-        return (NMSServerPlayer) invokeSafely(CRAFT_PLAYER_GET_HANDLE_METHOD, CRAFT_PLAYER_CLASS.cast(player));
+    public NMSServerPlayer asNMSServerPlayer(Player player) {
+        Class<?> craftBukkitCraftPlayerClass = getCraftBukkitClass("entity.CraftPlayer");
+        return (NMSServerPlayer) invokeSafely(getMethodSafely(craftBukkitCraftPlayerClass, "getHandle"),
+                craftBukkitCraftPlayerClass.cast(player));
     }
+
+    public abstract NMSEntitySpawnPacket asNMSEntitySpawnPacket(EntitySpawnPacket packet);
 
     @Getter
     public abstract class GenericNMSServerPlayer {
@@ -81,12 +66,26 @@ public abstract class NMSAdapter<
         private final NMSServerPlayer serverPlayer;
 
         public GenericNMSServerPlayer(Player player) {
-            serverPlayer = NMSAdapter.this.getServerPlayer(player);
+            serverPlayer = NMSAdapter.this.asNMSServerPlayer(player);
+        }
+
+        public GenericNMSServerPlayer(NMSServerPlayer player) {
+            serverPlayer = player;
         }
 
         @SuppressWarnings("ConstantConditions")
-        public void sendPacket(Packet packet) {
-            invokeSafely(SERVER_GAME_PACKET_LISTENER_IMPL_SEND_PACKET_METHOD, getFieldValueSafely(SERVER_PLAYER_CONNECTION_FIELD, getServerPlayer()), packet);
+        public void sendPacket(NMSPacket packet) {
+            invokeSafely(getCachedDeclaredMethod(
+                    getCachedClass("net.minecraft.server.network.PlayerConnection"),
+                    obfuscationMap.playerPacketListenerFieldName),
+                    getFieldValueSafely(getCachedField(
+                            getCraftBukkitClass("entity.CraftPlayer"),
+                            "connection"), getServerPlayer()),
+                    packet);
+        }
+
+        public void sendEntitySpawnPacket(EntitySpawnPacket packet) {
+            sendPacket(asNMSEntitySpawnPacket(packet));
         }
     }
 }
