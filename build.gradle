@@ -8,8 +8,6 @@ plugins {
 group = 'it.jakegblp'
 version = '1.0.0'
 
-def oldestJava = 16
-
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
 
@@ -21,13 +19,17 @@ dependencies {
 allprojects {
     apply plugin: 'java'
 
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8'
-        options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation', '-source', oldestJava, '-target', oldestJava]
-    }
-
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+        def module = project.name
+        def javaVersion =
+                (module.toLowerCase() == "NMS" || module == "version_interface") ? 16 :
+                        module.matches('1\\.17(\\.1)?') ? 16 :
+                                module.matches('1\\.(18|19|20)(\\.[1-4])?') ? 17 : 21
+        toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
+        tasks.withType(JavaCompile).configureEach {
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
+        }
     }
 
     repositories {
@@ -38,7 +40,12 @@ allprojects {
     }
 
     dependencies {
+        if (project.name == "version_interface") {
+            compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
+        }
+
         implementation 'com.github.zafarkhaja:java-semver:0.10.2'
+        implementation("org.jspecify:jspecify:1.0.0")
         compileOnly 'org.jetbrains:annotations:20.1.0'
 
         compileOnly 'org.projectlombok:lombok:1.18.36'
@@ -65,7 +72,6 @@ processResources {
     filteringCharset = 'UTF-8'
     filter(ReplaceTokens, tokens: [version: version])
 }
-
 
 build {
     doLast {
