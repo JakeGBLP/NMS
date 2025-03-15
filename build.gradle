@@ -14,6 +14,7 @@ dependencies {
     project(':nms').subprojects.each { subproject ->
         implementation project(subproject.path)
     }
+    implementation project(":version_interface")
 }
 
 allprojects {

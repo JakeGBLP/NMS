@@ -1,11 +1,12 @@
 package it.jakegblp.nms;
 
-import it.jakegblp.nms.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.EntitySpawnPacket;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftEntityType;
@@ -17,9 +18,15 @@ public final class v1_21_4 extends NMSAdapter<
         LivingEntity,
         Player,
         ServerPlayer,
+        EntityType<?>,
         Packet<?>,
         ClientboundAddEntityPacket
         > {
+
+    @Override
+    public EntityType<?> asNMSEntityType(org.bukkit.entity.EntityType entityType) {
+        return CraftEntityType.bukkitToMinecraft(entityType);
+    }
 
     @Override
     public ClientboundAddEntityPacket asNMSEntitySpawnPacket(EntitySpawnPacket packet) {
@@ -31,7 +38,7 @@ public final class v1_21_4 extends NMSAdapter<
                 packet.z(),
                 packet.pitch(),
                 packet.yaw(),
-                CraftEntityType.bukkitToMinecraft(packet.entityType()),
+                asNMSEntityType(packet.entityType()),
                 packet.data(),
                 CraftVector.toNMS(packet.velocity()),
                 packet.headYaw());

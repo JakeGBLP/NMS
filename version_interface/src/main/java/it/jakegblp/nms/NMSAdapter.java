@@ -1,14 +1,19 @@
 package it.jakegblp.nms;
 
-import it.jakegblp.nms.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.Version;
+import it.jakegblp.nms.api.packets.EntitySpawnPacket;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Map;
 
-import static it.jakegblp.nms.utils.CraftBukkitUtils.getCraftBukkitClass;
-import static it.jakegblp.nms.utils.ReflectionUtils.*;
+import static it.jakegblp.nms.api.utils.CraftBukkitUtils.getCraftBukkitClass;
+import static it.jakegblp.nms.api.utils.ReflectionUtils.*;
 
 @Getter
 public abstract class NMSAdapter<
@@ -17,10 +22,20 @@ public abstract class NMSAdapter<
         NMSLivingEntity extends NMSEntity,
         NMSPlayer extends NMSLivingEntity,
         NMSServerPlayer extends NMSPlayer,
+        NMSEntityType,
         NMSPacket,
         NMSEntitySpawnPacket extends NMSPacket
         > {
 
+    @SuppressWarnings("unchecked")
+    public final Class<? extends GenericNMSServerPlayer> NMS_SERVER_PLAYER_CLASS =
+            (Class<? extends GenericNMSServerPlayer>) Arrays.stream(getClass().getDeclaredClasses())
+                    .filter(clazz ->
+                            GenericNMSServerPlayer.class.isAssignableFrom(clazz) && Modifier.isAbstract(clazz.getModifiers()))
+                    .findFirst().orElseThrow();
+    @SuppressWarnings("unchecked")
+    public final Constructor<? extends GenericNMSServerPlayer> NMS_SERVER_PLAYER_CONSTRUCTOR =
+            (Constructor<? extends GenericNMSServerPlayer>) getDeclaredConstructorSafely(NMS_SERVER_PLAYER_CLASS, Player.class);
     public final Version MINECRAFT_VERSION = Version.parse(Bukkit.getBukkitVersion().split("-")[0]);
     public final ObfuscationMap obfuscationMap = forVersion(MINECRAFT_VERSION.toString());
 
@@ -58,7 +73,15 @@ public abstract class NMSAdapter<
                 craftBukkitCraftPlayerClass.cast(player));
     }
 
+    public abstract NMSEntityType asNMSEntityType(EntityType entityType);
+
     public abstract NMSEntitySpawnPacket asNMSEntitySpawnPacket(EntitySpawnPacket packet);
+
+    @SuppressWarnings("unchecked")
+    public GenericNMSServerPlayer asGenericNMSServerPlayer(Player player) {
+        assert NMS_SERVER_PLAYER_CONSTRUCTOR != null;
+        return (GenericNMSServerPlayer) newInstance(NMS_SERVER_PLAYER_CONSTRUCTOR, player);
+    }
 
     @Getter
     public abstract class GenericNMSServerPlayer {
