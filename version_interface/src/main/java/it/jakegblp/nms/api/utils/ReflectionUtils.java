@@ -1,5 +1,6 @@
-package it.jakegblp.nms.utils;
+package it.jakegblp.nms.api.utils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -89,6 +90,24 @@ public interface ReflectionUtils {
         try {
             return method.invoke(object, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static Constructor<?> getDeclaredConstructorSafely(Class<?> clazz, Class<?>... parameterTypes) {
+        try {
+            return clazz.getDeclaredConstructor(parameterTypes);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static Object newInstance(Constructor<?> constructor, Object... args) {
+        try {
+            return constructor.newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             return null;
         }

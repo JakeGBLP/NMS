@@ -1,4 +1,4 @@
-package it.jakegblp.nms;
+package it.jakegblp.nms.api;
 
 public class Version implements Comparable<Version> {
     private final int major;

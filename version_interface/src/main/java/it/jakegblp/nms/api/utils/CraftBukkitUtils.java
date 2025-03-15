@@ -1,4 +1,4 @@
-package it.jakegblp.nms.utils;
+package it.jakegblp.nms.api.utils;
 
 import org.bukkit.Bukkit;
 

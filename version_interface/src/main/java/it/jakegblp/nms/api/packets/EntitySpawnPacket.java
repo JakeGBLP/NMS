@@ -1,4 +1,4 @@
-package it.jakegblp.nms.packets;
+package it.jakegblp.nms.api.packets;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
