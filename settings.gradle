@@ -5,5 +5,6 @@ file('nms').listFiles()?.each { dir ->
         include ":nms:${dir.name}"
     }
 }
-include ':version_interface'
-
+include ':common'
+include 'nms:api'
+include 'common:From_1.21.3'

@@ -2,7 +2,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '8.3.0'
+    id 'com.gradleup.shadow' version '8.3.3'
 }
 
 group = 'it.jakegblp'
@@ -14,44 +14,64 @@ dependencies {
     project(':nms').subprojects.each { subproject ->
         implementation project(subproject.path)
     }
-    implementation project(":version_interface")
+    implementation "dev.jorel:commandapi-bukkit-shade:9.7.0"
+    annotationProcessor "dev.jorel:commandapi-annotations:9.7.0"
 }
 
 allprojects {
     apply plugin: 'java'
 
+    def module = project.name
+
+    def javaVersion = 17
+            //module == "all" ? 21 :
+            //        ["common", "from", "to"].any { module.contains(it) } || module ==~ /1\.17(\.1)?/ ? 17 :
+            //                module ==~ /1\.(18|19|20)(\.[1-4])?/ ? 17 :
+            //                        module ==~ /1\.21(\.[1-4])?/ ? 21 :
+            //                                17
+
+
     java {
-        def module = project.name
-        def javaVersion =
-                (module.toLowerCase() == "NMS" || module == "version_interface") ? 16 :
-                        module.matches('1\\.17(\\.1)?') ? 16 :
-                                module.matches('1\\.(18|19|20)(\\.[1-4])?') ? 17 : 21
-        toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
-        tasks.withType(JavaCompile).configureEach {
-            sourceCompatibility = javaVersion
-            targetCompatibility = javaVersion
-        }
+        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     repositories {
         mavenCentral()
+        mavenLocal()
         maven { url = "https://jitpack.io/" }
         maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
         maven { url = 'https://oss.sonatype.org/content/groups/public/' }
+        maven { url = "https://repo.destroystokyo.com/repository/maven-public/" }
     }
 
     dependencies {
-        if (project.name == "version_interface") {
-            compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
+        if (module == "common") {
+            compileOnly "org.spigotmc:spigot:1.21.4-R0.1-SNAPSHOT:remapped-mojang"
+        } else if (module != "shared") {
+            implementation project(':common')
         }
 
+        def isImplementationModule = module.contains("from") || module.contains("to")
+
+        if (!isImplementationModule && module != "shared" && module != "api") {
+            rootProject.subprojects.each { sub ->
+                if ((module == "common" && sub.name == "shared") || (module != "common" && (sub.name.contains("from") || sub.name.contains("to"))))
+                    implementation project(":nms:${sub.name}")
+            }
+        }
+        compileOnly 'it.unimi.dsi:fastutil:8.5.15'
+        implementation "net.kyori:adventure-platform-bukkit:4.4.0"
         implementation 'com.github.zafarkhaja:java-semver:0.10.2'
         implementation("org.jspecify:jspecify:1.0.0")
         compileOnly 'org.jetbrains:annotations:20.1.0'
 
         compileOnly 'org.projectlombok:lombok:1.18.36'
         annotationProcessor 'org.projectlombok:lombok:1.18.36'
-
         testCompileOnly 'org.projectlombok:lombok:1.18.36'
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
     }
@@ -69,9 +89,15 @@ allprojects {
     }
 }
 
+
 processResources {
     filteringCharset = 'UTF-8'
     filter(ReplaceTokens, tokens: [version: version])
+}
+
+shadowJar {
+    relocate("io.papermc.lib", "it.jakegblp.nms.libraries.paperlib")
+    relocate("dev.jorel.commandapi", "it.jakegblp.nms.libraries.commandapi")
 }
 
 build {
