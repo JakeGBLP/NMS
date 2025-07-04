@@ -4,7 +4,7 @@ package it.jakegblp.nms.api.entity.metadata;
 * Interface that all flag enums must implement.
 * This is to ensure that the enum provides methods for checking and setting the flag.
 */
-interface Flag extends Cloneable {
+public interface BitFlag extends Cloneable {
 
     byte getMask();
 

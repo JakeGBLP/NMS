@@ -6,7 +6,7 @@ import it.jakegblp.nms.api.NMSObject;
  * Abstract base class for handling entity flags, which works with any enum that represents flag values.
  * The subclass must specify the enum type.
  */
-public abstract class Flags<T extends Enum<T> & Flag> implements NMSObject<Byte> {
+public abstract class Flags<T extends Enum<T> & BitFlag> implements NMSObject<Byte> {
 
     protected byte flags;
 

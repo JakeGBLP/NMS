@@ -1,10 +1,12 @@
 package it.jakegblp.nms.api;
 
+import com.google.common.base.Preconditions;
 import it.jakegblp.nms.api.entity.metadata.EntityDataSerializerInfo;
+import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import it.jakegblp.nms.api.packets.EntitySpawnPacket;
 import it.jakegblp.nms.api.utils.ReflectionUtils;
-import it.jakegblp.nms.impl.SharedUtils;
+import it.jakegblp.nms.api.utils.SharedUtils;
 import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.entity.Player;
@@ -16,7 +18,7 @@ import java.util.Map;
 
 import static it.jakegblp.nms.api.utils.ReflectionUtils.getDeclaredConstructor;
 import static it.jakegblp.nms.api.utils.ReflectionUtils.newInstance;
-import static it.jakegblp.nms.impl.SharedUtils.asNMS;
+import static it.jakegblp.nms.api.utils.SharedUtils.asNMS;
 
 @Getter
 public abstract class NMSAdapter<
@@ -74,9 +76,13 @@ public abstract class NMSAdapter<
     public Class<?> getNMSBlockVectorClass() {
         return ReflectionUtils.getClass("net.minecraft.core.BlockPosition");
     }
-
+    public <T> NMSEntityDataSerializer getEntityDataSerializer(MetadataKey<?, T> key) {
+        return entityDataSerializerMap.get(new EntityDataSerializerInfo<>(key.getEntityClass(), key.getSerializationType()));
+    }
     public <T> NMSEntityDataSerializer getEntityDataSerializer(Class<T> clazz, EntityDataSerializerInfo.Type type) {
-        return entityDataSerializerMap.get(new EntityDataSerializerInfo<>(clazz, type));
+        NMSEntityDataSerializer serializer = entityDataSerializerMap.get(new EntityDataSerializerInfo<>(clazz, type));
+        Preconditions.checkNotNull(serializer, "Could not find EntityDataSerializer for " + clazz + " and serialization type " + type);
+        return serializer;
     }
 
     public NMSEntityDataSerializer getEntityDataSerializer(@NotNull Class<?> clazz) {

@@ -1,4 +1,4 @@
-package it.jakegblp.nms.impl;
+package it.jakegblp.nms.api.utils;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -7,23 +7,30 @@ import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
+import static it.jakegblp.nms.api.utils.ReflectionUtils.getDeclaredMethod;
+import static it.jakegblp.nms.api.utils.ReflectionUtils.invokeSafely;
+
 public class SharedUtils {
+
+    public static final String CRAFT_BUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
 
     public static BiMap<org.bukkit.entity.Pose, Pose> POSE_MAP = ImmutableBiMap.of(org.bukkit.entity.Pose.SNEAKING, Pose.CROUCHING);
 
     public static ServerPlayer asServerPlayer(Player player) {
-        return ((CraftPlayer) player).getHandle();
+        Class<?> craftPlayerClass = ReflectionUtils.getClass(CRAFT_BUKKIT_PACKAGE+".entity.CraftPlayer");
+        return (ServerPlayer) invokeSafely(getDeclaredMethod(craftPlayerClass, "getHandle"), player);
     }
 
     public static Player asPlayer(ServerPlayer serverPlayer) {
@@ -81,9 +88,8 @@ public class SharedUtils {
     }
 
     public static void sendPacket(Player player, Object packet) {
-        asServerPlayer(player).connection.sendPacket((Packet<?>) packet);
+        sendPacket(asServerPlayer(player), packet);
     }
-
     public static Object asNMS(Object object) {
         if (object instanceof NMSObject<?> nmsObject) {
             return nmsObject.asNMS();
@@ -97,5 +103,12 @@ public class SharedUtils {
             return asServerPlayer(player);
         }
         return object;
+    }
+
+    public static Class<?> getAsSerializableType(Class<?> type) {
+        if (type == MutableComponent.class) {
+            return Component.class;
+        }
+        return type;
     }
 }

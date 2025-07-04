@@ -7,17 +7,22 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import it.jakegblp.nms.api.NMSApi;
-import it.jakegblp.nms.api.entity.metadata.EntityMetadata;
+import it.jakegblp.nms.api.entity.metadata.EntityFlags;
+import it.jakegblp.nms.api.entity.metadata.HandStates;
+import it.jakegblp.nms.api.entity.metadata.LivingEntityMetadata;
+import it.jakegblp.nms.api.entity.metadata.keys.MetadataKeyRegistry;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import it.jakegblp.nms.api.packets.EntitySpawnPacket;
 import it.jakegblp.nms.impl.*;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
@@ -109,6 +114,7 @@ public class NMS extends JavaPlugin {
         } else {
             nmsAdapter = null;
         }
+        MetadataKeyRegistry.init();
 
         if (nmsAdapter == null)
             throw new IllegalStateException("NMS implementation not found");
@@ -122,7 +128,7 @@ public class NMS extends JavaPlugin {
                     getLogger().info(Arrays.toString(args.args()));
                     if (args.get("packet") instanceof String s && s.equals("spawn-entity")) {
                         player.sendMessage("Spawned fake iron golem at your location.");
-                        getLogger().info("Spawned fake iron golem at "+player+"'s location.");
+                        getLogger().info("Spawned fake entity at "+player+"'s location.");
                         Location location = player.getLocation();
                         NMSApi.sendPacket(player, new EntitySpawnPacket(
                                 NMSApi.generateRandomId(),
@@ -140,15 +146,14 @@ public class NMS extends JavaPlugin {
                         int id = NMSApi.getRandomID();
                         player.sendMessage("Changed entity metadata of entity with id "+id);
                         getLogger().info("Changed entity metadata of entity with id "+id);
-                        EntityMetadata EntityMetadata = new EntityMetadata();
-                        EntityMetadata.EntityFlags entityFlags = new EntityMetadata.EntityFlags();
-                        entityFlags.setGlowing(true);
-                        entityFlags.setOnFire(true);
-                        EntityMetadata.setEntityFlags(entityFlags);
-                        NMSApi.sendPacket(player, new EntityMetadataPacket<>(id, Entity.class, EntityMetadata));
+                        LivingEntityMetadata metadata = new LivingEntityMetadata();
+                        metadata.setHandStates(new HandStates().setRiptiding(true));
+                        metadata.setEntityFlags(new EntityFlags().setGlowing(true).setOnFire(true));
+                        metadata.setCustomName(Component.text("Cool name", NamedTextColor.GOLD));
+                        metadata.setCustomNameVisible(true);
+                        NMSApi.sendPacket(player, new EntityMetadataPacket<>(id, LivingEntity.class, metadata));
                     }
-                })
-                .register();
+                }).register();
 
         getLogger().info("NMS has been enabled!");
         getLogger().info("- Server version: " + version);

@@ -2,7 +2,9 @@ package it.jakegblp.nms.impl;
 
 import it.jakegblp.nms.api.EntityMetadataPacketAdapter;
 import it.jakegblp.nms.api.EntityTypeAdapter;
+import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
+import it.jakegblp.nms.api.utils.SharedUtils;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -13,11 +15,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static it.jakegblp.nms.api.NMSAdapter.nmsAdapter;
 import static it.jakegblp.nms.api.entity.metadata.EntityDataSerializerInfo.Type.OPTIONAL;
-import static it.jakegblp.nms.impl.SharedUtils.asNamespacedKey;
-import static it.jakegblp.nms.impl.SharedUtils.asResourceLocation;
+import static it.jakegblp.nms.api.utils.SharedUtils.*;
 
 public class To_1_19_1 implements EntityTypeAdapter<EntityType<?>>, EntityMetadataPacketAdapter<ClientboundSetEntityDataPacket> {
 
@@ -55,14 +58,18 @@ public class To_1_19_1 implements EntityTypeAdapter<EntityType<?>>, EntityMetada
                         return null;
                     }
                 });
-        synchedEntityData.assignValues((List<SynchedEntityData.DataItem<?>>) (List<?>) to.getEntityMetadata().getEntityDataMap().values().stream()
-                .map(data -> new SynchedEntityData.DataItem<>(
-                        ((EntityDataSerializer<Object>) nmsAdapter.getEntityDataSerializer(
-                                data.getRawValueClass(),
-                                data.getSerializerInfoType()
-                        )).createAccessor(data.getIndex()),
-                        data.getSerializerInfoType() == OPTIONAL ? data.getOptionalRawValue() : data.getRawValue()))
-                .toList());
+        synchedEntityData.assignValues((List<SynchedEntityData.DataItem<?>>) (List<?>) to.getEntityMetadata().getMetadataItems().entrySet().stream()
+                .filter(Objects::nonNull)
+                .map(entry -> {
+                    Object nmsValue = asNMS(entry.getValue());
+                    MetadataKey<?, ?> key = entry.getKey();
+                    return new SynchedEntityData.DataItem<>(
+                            ((EntityDataSerializer<Object>) nmsAdapter.getEntityDataSerializer(
+                                    SharedUtils.getAsSerializableType(nmsValue.getClass()),
+                                    key.getSerializationType()
+                            )).createAccessor(key.getIndex()),
+                            key.getSerializationType() == OPTIONAL ? Optional.of(nmsValue) : nmsValue);
+                }).toList());
         return new ClientboundSetEntityDataPacket(to.getEntityId(), synchedEntityData, true);
     }
 }

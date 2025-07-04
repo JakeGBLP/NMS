@@ -1,143 +1,115 @@
 package it.jakegblp.nms.api.entity.metadata;
 
-import it.jakegblp.nms.api.NMSAdapter;
-import it.jakegblp.nms.api.utils.MapUtils;
+import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pose;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Map;
-import java.util.Optional;
+import java.util.TreeMap;
+
+import static it.jakegblp.nms.api.entity.metadata.keys.MetadataKeyRegistry.EntityKeys.*;
+import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 
 /**
  * See: <a href="https://minecraft.wiki/w/Java_Edition_protocol/Entity_metadata#Entity">Minecraft Wiki – Entity Metadata</a>
  */
 @Getter
 @Setter
+@AllArgsConstructor
 @SuppressWarnings("unchecked")
-public class EntityMetadata implements EntityMetadataView {
-
-    public static final EntityMetadataView DEFAULT_ENTITY_METADATA = new EntityMetadataView() {};
-
-    public final HashMap<BaseProperty, AbstractEntityData<? extends Entity, ?, ?>> entityDataMap;
-
-    public EntityMetadata() {
-        this(DEFAULT_ENTITY_METADATA.getEntityDataItems());
-    }
-
-    public EntityMetadata(HashMap<BaseProperty, AbstractEntityData<? extends Entity, ?, ?>> entityDataMap) {
-        this.entityDataMap = entityDataMap;
-    }
-
-    public EntityMetadata(
-            @NotNull EntityFlags entityFlags,
-            int airTicks,
-            @Nullable Component customName,
-            boolean customNameVisible,
-            boolean silent,
-            boolean noGravity,
-            @NotNull Pose pose,
-            int ticksFrozen
-    ) {
-        this(MapUtils.createEntityDataMap(
-                Map.entry(Property.ENTITY_FLAGS, EntityData.rawDefault(0, entityFlags, DEFAULT_ENTITY_METADATA.getEntityFlags(), EntityFlags.class, Byte.class)),
-                Map.entry(Property.AIR_TICKS, EntityData.simpleDefault(1, airTicks, DEFAULT_ENTITY_METADATA.getAirTicks())),
-                Map.entry(Property.CUSTOM_NAME, EntityData.rawDefaultOptional(2, customName, DEFAULT_ENTITY_METADATA.getCustomName().orElse(null), Component.class, NMSAdapter.nmsAdapter.getNMSComponentClass())),
-                Map.entry(Property.CUSTOM_NAME_VISIBILITY, EntityData.simpleDefault(3, customNameVisible, DEFAULT_ENTITY_METADATA.isCustomNameVisible())),
-                Map.entry(Property.SILENT, EntityData.simpleDefault(4, silent, DEFAULT_ENTITY_METADATA.isSilent())),
-                Map.entry(Property.NO_GRAVITY, EntityData.simpleDefault(5, noGravity, DEFAULT_ENTITY_METADATA.hasNoGravity())),
-                Map.entry(Property.POSE, EntityData.rawDefault(6, pose, DEFAULT_ENTITY_METADATA.getPose(), Pose.class, NMSAdapter.nmsAdapter.getNMSPoseClass())),
-                Map.entry(Property.TICKS_FROZEN, EntityData.simpleDefault(7, ticksFrozen, DEFAULT_ENTITY_METADATA.getTicksFrozen()))
-        ));
-    }
+@SuperBuilder(toBuilder = true)
+public class EntityMetadata implements EntityMetadataView, Cloneable {
 
     @Nullable
-    public <T> T getProperty(BaseProperty property) {
-        AbstractEntityData.View<T> entityData = (AbstractEntityData.View<T>) entityDataMap.get(property);
-        if (entityData == null) return null;
-        return entityData.getValue();
+    protected EntityFlags entityFlags;
+    @Nullable
+    protected Integer airTicks;
+    @Nullable
+    protected Component customName;
+    @Nullable
+    protected Boolean customNameVisible;
+    @Nullable
+    protected Boolean silent;
+    @Nullable
+    protected Boolean noGravity;
+    @Nullable
+    protected Pose pose;
+    @Nullable
+    protected Integer ticksFrozen;
+
+    /**
+     * Creates an entity metadata instance where all values are null.
+     */
+    public EntityMetadata() {
     }
 
-    public <T> void setProperty(BaseProperty property, T value) {
-        AbstractEntityData.Controller<T> entityDataController = (AbstractEntityData.Controller<T>) entityDataMap.get(property);
-        if (entityDataController == null) return;
-        this.entityDataMap.put(property, entityDataController.setValue(value));
-    }
-
-    @Override
-    public @NotNull EntityFlags getEntityFlags() {
-        return getProperty(Property.ENTITY_FLAGS);
-    }
-
-    public void setEntityFlags(EntityFlags entityFlags) {
-        setProperty(Property.ENTITY_FLAGS, entityFlags);
-    }
-
-    @Override
-    public int getAirTicks() {
-        return getProperty(Property.AIR_TICKS);
-    }
-
-    public void setAirTicks(int airTicks) {
-        setProperty(Property.AIR_TICKS, airTicks);
-    }
-
-    @Override
-    public @NotNull Optional<Component> getCustomName() {
-        return getProperty(Property.CUSTOM_NAME);
-    }
-
-    public void setCustomName(@Nullable Component name) {
-        setProperty(Property.CUSTOM_NAME, name);
+    public EntityMetadata(EntityMetadataView view) {
+        this(
+                cloneIfNotNull(view.getEntityFlags()),
+                view.getAirTicks(),
+                view.getCustomName(),
+                view.getCustomNameVisible(),
+                view.getSilent(),
+                view.getNoGravity(),
+                view.getPose(),
+                view.getTicksFrozen()
+        );
     }
 
     @Override
-    public boolean isCustomNameVisible() {
-        return getProperty(Property.CUSTOM_NAME_VISIBILITY);
+    public <T> T get(MetadataKey<? extends Entity, T> key) {
+        return (T) switch (key.getIndex()) {
+            case 0 -> entityFlags;
+            case 1 -> airTicks;
+            case 2 -> customName;
+            case 3 -> customNameVisible;
+            case 4 -> silent;
+            case 5 -> noGravity;
+            case 6 -> pose;
+            case 7 -> ticksFrozen;
+            default ->
+                    throw new IllegalArgumentException("Unrecognized key with index " + key.getIndex() + " for " + this.getClass().getSimpleName() + " metadata.");
+        };
     }
 
-    public void setCustomNameVisible(boolean visible) {
-        setProperty(Property.CUSTOM_NAME_VISIBILITY, visible);
+    public <T> void set(MetadataKey<? extends Entity, T> key, @Nullable T value) {
+        switch (key.getIndex()) {
+            case 0 -> entityFlags = (EntityFlags) value;
+            case 1 -> airTicks = (Integer) value;
+            case 2 -> customName = (Component) value;
+            case 3 -> customNameVisible = (Boolean) value;
+            case 4 -> silent = (Boolean) value;
+            case 5 -> noGravity = (Boolean) value;
+            case 6 -> pose = (Pose) value;
+            case 7 -> ticksFrozen = (Integer) value;
+            default ->
+                    throw new IllegalArgumentException("Unrecognized key with index " + key.getIndex() + " for " + this.getClass().getSimpleName() + " metadata.");
+        }
+    }
+
+    public Map<MetadataKey<? extends Entity, ?>, Object> getMetadataItems() {
+        Map<MetadataKey<? extends Entity, ?>, Object> map = new TreeMap<>(Comparator.comparingInt(MetadataKey::getIndex));
+        for (MetadataKey<Entity, ?> key : keys())
+            map.put(key, get(key));
+        return map;
     }
 
     @Override
-    public boolean isSilent() {
-        return getProperty(Property.SILENT);
+    public EntityMetadata clone() {
+        try {
+            EntityMetadata clone = (EntityMetadata) super.clone();
+            clone.entityFlags = cloneIfNotNull(this.entityFlags);
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
-    public void setSilent(boolean silent) {
-        setProperty(Property.SILENT, silent);
-    }
-
-    @Override
-    public boolean hasNoGravity() {
-        return getProperty(Property.NO_GRAVITY);
-    }
-
-    public void setHasNoGravity(boolean noGravity) {
-        setProperty(Property.NO_GRAVITY, noGravity);
-    }
-
-    @Override
-    public @NotNull Pose getPose() {
-        return getProperty(Property.POSE);
-    }
-
-    public void setPose(Pose pose) {
-        setProperty(Property.POSE, pose);
-    }
-
-    @Override
-    public int getTicksFrozen() {
-        return getProperty(Property.TICKS_FROZEN);
-    }
-
-    public void setTicksFrozen(int ticks) {
-        setProperty(Property.TICKS_FROZEN, ticks);
-    }
 }
