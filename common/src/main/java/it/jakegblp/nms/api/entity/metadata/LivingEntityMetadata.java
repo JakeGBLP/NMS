@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.entity.metadata;
 
-import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-import static it.jakegblp.nms.api.entity.metadata.keys.MetadataKeyRegistry.LivingEntityKeys.keys;
+import static it.jakegblp.nms.api.entity.metadata.key.MetadataKeyRegistry.LivingEntityKeys.keys;
 import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 
 @Getter
@@ -113,8 +113,7 @@ public class LivingEntityMetadata extends EntityMetadata implements LivingEntity
 
     @Override
     public LivingEntityMetadata clone() {
-        LivingEntityMetadata clone = (LivingEntityMetadata) super.clone();
-        clone.handStates = cloneIfNotNull(this.handStates);
-        return clone;
+        LivingEntityMetadata metadata = (LivingEntityMetadata) super.clone();
+        return new LivingEntityMetadata(this);
     }
 }

@@ -9,7 +9,7 @@ import org.bukkit.util.Vector;
 import java.util.Objects;
 import java.util.UUID;
 
-import static it.jakegblp.nms.api.NMSAdapter.nmsAdapter;
+import static it.jakegblp.nms.api.NMSAdapter.NMS;
 
 /**
  * <a href="https://minecraft.wiki/w/Java_Edition_protocol/Packets#Spawn_Entity">Entity Spawn Packet</a>
@@ -110,6 +110,6 @@ public class EntitySpawnPacket extends EntityPacket<ClientboundAddEntityPacket> 
 
     @Override
     public ClientboundAddEntityPacket asNMS() {
-        return (ClientboundAddEntityPacket) nmsAdapter.entitySpawnPacketAdapter.to(this);
+        return NMS.entitySpawnPacketAdapter.to(this);
     }
 }

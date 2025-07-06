@@ -1,7 +1,7 @@
-package it.jakegblp.nms.api.entity.metadata.keys;
+package it.jakegblp.nms.api.entity.metadata.key;
 
-import it.jakegblp.nms.api.entity.metadata.EntityDataSerializerInfo;
 import it.jakegblp.nms.api.entity.metadata.EntityFlags;
+import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import it.jakegblp.nms.api.entity.metadata.HandStates;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
@@ -31,7 +31,7 @@ public final class MetadataKeyRegistry {
             List<MetadataKey<?, ?>> keys = keysByClass.get(current);
             if (keys != null) {
                 for (MetadataKey<?, ?> key : keys) {
-                    result.add((MetadataKey<E, ?>) key); // Unsafe cast, but necessary and safe by structure
+                    result.add((MetadataKey<E, ?>) key);
                 }
             }
             current = current.getSuperclass();
@@ -46,7 +46,7 @@ public final class MetadataKeyRegistry {
     public static final class EntityKeys {
         public static final MetadataKey<Entity, EntityFlags> ENTITY_FLAGS = register(new MetadataKey<>(Entity.class, 0, new EntityFlags()));
         public static final MetadataKey<Entity, Integer> AIR_TICKS = register(new MetadataKey<>(Entity.class, 1, 300));
-        public static final MetadataKey<Entity, Component> CUSTOM_NAME = register(new MetadataKey<>(Entity.class, 2, null, Component.class, EntityDataSerializerInfo.Type.OPTIONAL));
+        public static final MetadataKey<Entity, Component> CUSTOM_NAME = register(new MetadataKey<>(Entity.class, 2, null, Component.class, EntitySerializerInfo.Type.OPTIONAL));
         public static final MetadataKey<Entity, Boolean> CUSTOM_NAME_VISIBILITY = register(new MetadataKey<>(Entity.class, 3, false));
         public static final MetadataKey<Entity, Boolean> SILENT = register(new MetadataKey<>(Entity.class, 4, false));
         public static final MetadataKey<Entity, Boolean> NO_GRAVITY = register(new MetadataKey<>(Entity.class, 5, false));
@@ -67,7 +67,7 @@ public final class MetadataKeyRegistry {
         public static final MetadataKey<LivingEntity, Boolean> POTION_EFFECT_AMBIENT = register(new MetadataKey<>(LivingEntity.class, 11, false));
         public static final MetadataKey<LivingEntity, Integer> ARROW_COUNT = register(new MetadataKey<>(LivingEntity.class, 12, 0));
         public static final MetadataKey<LivingEntity, Integer> BEE_STINGER_COUNT = register(new MetadataKey<>(LivingEntity.class, 13, 0));
-        public static final MetadataKey<LivingEntity, BlockVector> SLEEPING_BED_LOCATION = register(new MetadataKey<>(LivingEntity.class, 14, null, BlockVector.class, EntityDataSerializerInfo.Type.OPTIONAL));
+        public static final MetadataKey<LivingEntity, BlockVector> SLEEPING_BED_LOCATION = register(new MetadataKey<>(LivingEntity.class, 14, null, BlockVector.class, EntitySerializerInfo.Type.OPTIONAL));
 
         public static List<MetadataKey<LivingEntity, ?>> keys() {
             return MetadataKeyRegistry.getAllFor(LivingEntity.class);

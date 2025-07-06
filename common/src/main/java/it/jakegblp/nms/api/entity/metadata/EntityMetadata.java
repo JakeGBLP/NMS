@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.entity.metadata;
 
-import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static it.jakegblp.nms.api.entity.metadata.keys.MetadataKeyRegistry.EntityKeys.*;
+import static it.jakegblp.nms.api.entity.metadata.key.MetadataKeyRegistry.EntityKeys.keys;
 import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 
 /**
@@ -103,13 +103,7 @@ public class EntityMetadata implements EntityMetadataView, Cloneable {
 
     @Override
     public EntityMetadata clone() {
-        try {
-            EntityMetadata clone = (EntityMetadata) super.clone();
-            clone.entityFlags = cloneIfNotNull(this.entityFlags);
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
+        return new EntityMetadata(this);
     }
 
 }

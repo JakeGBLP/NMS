@@ -7,7 +7,6 @@ import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,8 +28,8 @@ public class SharedUtils {
     public static BiMap<org.bukkit.entity.Pose, Pose> POSE_MAP = ImmutableBiMap.of(org.bukkit.entity.Pose.SNEAKING, Pose.CROUCHING);
 
     public static ServerPlayer asServerPlayer(Player player) {
-        Class<?> craftPlayerClass = ReflectionUtils.getClass(CRAFT_BUKKIT_PACKAGE+".entity.CraftPlayer");
-        return (ServerPlayer) invokeSafely(getDeclaredMethod(craftPlayerClass, "getHandle"), player);
+        return (ServerPlayer) invokeSafely(getDeclaredMethod(
+                ReflectionUtils.getClass(CRAFT_BUKKIT_PACKAGE+".entity.CraftPlayer"), "getHandle"), player);
     }
 
     public static Player asPlayer(ServerPlayer serverPlayer) {
@@ -103,12 +102,5 @@ public class SharedUtils {
             return asServerPlayer(player);
         }
         return object;
-    }
-
-    public static Class<?> getAsSerializableType(Class<?> type) {
-        if (type == MutableComponent.class) {
-            return Component.class;
-        }
-        return type;
     }
 }

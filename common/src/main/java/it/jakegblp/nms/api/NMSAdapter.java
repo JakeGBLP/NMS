@@ -1,42 +1,46 @@
 package it.jakegblp.nms.api;
 
 import com.google.common.base.Preconditions;
-import it.jakegblp.nms.api.entity.metadata.EntityDataSerializerInfo;
-import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
+import it.jakegblp.nms.api.entity.metadata.Flags;
+import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import it.jakegblp.nms.api.packets.EntitySpawnPacket;
-import it.jakegblp.nms.api.utils.ReflectionUtils;
 import it.jakegblp.nms.api.utils.SharedUtils;
 import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.server.level.ServerPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static it.jakegblp.nms.api.utils.ReflectionUtils.getDeclaredConstructor;
 import static it.jakegblp.nms.api.utils.ReflectionUtils.newInstance;
 import static it.jakegblp.nms.api.utils.SharedUtils.asNMS;
 
-@Getter
-public abstract class NMSAdapter<
-        NMSServerPlayer,
-        NMSEntityDataSerializer,
-        NMSPacket,
-        NMSEntitySpawnPacket extends NMSPacket,
-        NMSEntityMetadataPacket extends NMSPacket
-        > {
+public abstract class NMSAdapter {
 
-    public static NMSAdapter nmsAdapter;
+    public static NMSAdapter NMS;
 
-    public EntityTypeAdapter<?> entityTypeAdapter;
-    public EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter;
-    public EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter;
+    public JavaPlugin javaPlugin;
+    public EntityTypeAdapter entityTypeAdapter;
+    public EntitySpawnPacketAdapter entitySpawnPacketAdapter;
+    public EntityMetadataPacketAdapter entityMetadataPacketAdapter;
+    public PlayerRotationPacketAdapter playerRotationPacketAdapter = null;
     public BukkitAudiences adventure;
 
-    public final Map<EntityDataSerializerInfo<?>, NMSEntityDataSerializer> entityDataSerializerMap = new HashMap<>();
+    public final Map<EntitySerializerInfo<?>, EntityDataSerializer<?>> entityDataSerializerMap = new HashMap<>();
 
     @NotNull
     public final Class<? extends GenericNMSServerPlayer> NMS_SERVER_PLAYER_CLASS;
@@ -57,73 +61,103 @@ public abstract class NMSAdapter<
                 );
             }
         }
-        if (nmsServerPlayerClass == null)
-            throw new RuntimeException("Could not find NMSServerPlayer class");
+        Preconditions.checkArgument(nmsServerPlayerClass != null, "Could not find ServerPlayer class.");
         NMS_SERVER_PLAYER_CLASS = nmsServerPlayerClass;
-        if (nmsServerPlayerConstructor == null)
-            throw new RuntimeException("Could not find NMSServerPlayer constructor");
+        Preconditions.checkArgument(nmsServerPlayerConstructor != null, "Could not find ServerPlayer constructor.");
         NMS_SERVER_PLAYER_CONSTRUCTOR = nmsServerPlayerConstructor;
     }
 
-    public Class<?> getNMSComponentClass() {
-        return ReflectionUtils.getClass("net.minecraft.network.chat.IChatBaseComponent");
+    public <T> void registerEntityDataSerializer(
+            EntitySerializerInfo<T> info,
+            EntityDataSerializer<T> entityDataSerializer
+    ) {
+        entityDataSerializerMap.put(info, entityDataSerializer);
+    }
+    public <T> void registerOptionalEntityDataSerializer(
+            EntitySerializerInfo<T> info,
+            EntityDataSerializer<Optional<T>> entityDataSerializer
+    ) {
+        entityDataSerializerMap.put(info, entityDataSerializer);
+    }
+    public <T> void registerHolderEntityDataSerializer(
+            EntitySerializerInfo<T> info,
+            EntityDataSerializer<Holder<T>> entityDataSerializer
+    ) {
+        entityDataSerializerMap.put(info, entityDataSerializer);
+    }
+    public <T> void registerListEntityDataSerializer(
+            EntitySerializerInfo<T> info,
+            EntityDataSerializer<List<T>> entityDataSerializer
+    ) {
+        entityDataSerializerMap.put(info, entityDataSerializer);
     }
 
-    public Class<?> getNMSPoseClass() {
-        return ReflectionUtils.getClass("net.minecraft.world.entity.EntityPose");
-    }
-
-    public Class<?> getNMSBlockVectorClass() {
-        return ReflectionUtils.getClass("net.minecraft.core.BlockPosition");
-    }
-    public <T> NMSEntityDataSerializer getEntityDataSerializer(MetadataKey<?, T> key) {
-        return entityDataSerializerMap.get(new EntityDataSerializerInfo<>(key.getEntityClass(), key.getSerializationType()));
-    }
-    public <T> NMSEntityDataSerializer getEntityDataSerializer(Class<T> clazz, EntityDataSerializerInfo.Type type) {
-        NMSEntityDataSerializer serializer = entityDataSerializerMap.get(new EntityDataSerializerInfo<>(clazz, type));
-        Preconditions.checkNotNull(serializer, "Could not find EntityDataSerializer for " + clazz + " and serialization type " + type);
-        return serializer;
-    }
-
-    public NMSEntityDataSerializer getEntityDataSerializer(@NotNull Class<?> clazz) {
-        return entityDataSerializerMap.get(new EntityDataSerializerInfo<>(clazz));
+    /**
+     * This method must only be used for unimplemented serializers or ones without an easy implementation.<br>
+     * This is not to be kept final.
+     */
+    public void registerUnknownEntityDataSerializer(
+            EntitySerializerInfo<?> info,
+            EntityDataSerializer<?> entityDataSerializer
+    ) {
+        entityDataSerializerMap.put(info, entityDataSerializer);
     }
 
     @SuppressWarnings("unchecked")
+    public <T> EntityDataSerializer<T> getEntityDataSerializer(MetadataKey<?, T> key) {
+        return (EntityDataSerializer<T>) entityDataSerializerMap.get(new EntitySerializerInfo<>(key.getEntityClass(), key.getEntitySerializerInfo().serializerType()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> EntityDataSerializer<T> getEntityDataSerializer(Class<T> clazz, EntitySerializerInfo.Type type) {
+        Bukkit.getLogger().info("getEntityDataSerializer: " + clazz.getName() + ", " + type);
+        EntityDataSerializer<T> entityDataSerializer = (EntityDataSerializer<T>) entityDataSerializerMap.get(new EntitySerializerInfo<>(clazz, type));
+        Preconditions.checkNotNull(entityDataSerializer, "Could not find EntityDataSerializer for " + type + " " + clazz.getName());
+        return entityDataSerializer;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> EntityDataSerializer<T> getEntityDataSerializer(Class<T> clazz) {
+        return (EntityDataSerializer<T>) entityDataSerializerMap.get(EntitySerializerInfo.normal(clazz));
+    }
+
     public GenericNMSServerPlayer asGenericNMSServerPlayer(Player player) {
         return (GenericNMSServerPlayer) newInstance(NMS_SERVER_PLAYER_CONSTRUCTOR, this, player);
     }
 
-    public void printMetadataPacket(NMSEntityMetadataPacket packet) {
-    }
-    public void printSpawnPacket(NMSEntitySpawnPacket packet) {
+    public Class<?> getSerializableClass(Class<?> clazz) {
+        if (Component.class.isAssignableFrom(clazz)) return Component.class;
+        else if (Flags.class.isAssignableFrom(clazz)) return Byte.class;
+        return clazz;
     }
 
     @Getter
     public abstract class GenericNMSServerPlayer {
 
-        protected final NMSServerPlayer serverPlayer;
+        protected final ServerPlayer serverPlayer;
         protected final Player player;
 
-        @SuppressWarnings("unchecked")
         public GenericNMSServerPlayer(Player player) {
-            serverPlayer = (NMSServerPlayer) asNMS(player);
+            this.serverPlayer = (ServerPlayer) asNMS(player);
             this.player = player;
         }
 
-        protected void sendPacket(NMSPacket packet) {
+        protected void sendPacket(Packet<?> packet) {
             SharedUtils.sendPacket(player, packet);
         }
 
-        @SuppressWarnings("unchecked")
         public void sendEntitySpawnPacket(EntitySpawnPacket packet) {
-            sendPacket((NMSPacket) entitySpawnPacketAdapter.to(packet));
+            sendPacket(entitySpawnPacketAdapter.to(packet));
         }
-        @SuppressWarnings("unchecked")
         public void sendEntityMetadataPacket(EntityMetadataPacket<?, ?> packet) {
-            sendPacket((NMSPacket) entityMetadataPacketAdapter.to(packet));
+            sendPacket(entityMetadataPacketAdapter.to(packet));
         }
 
+    }
+
+    public void disable() {
+        adventure.close();
+        adventure = null;
     }
 }
 

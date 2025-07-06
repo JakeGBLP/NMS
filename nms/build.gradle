@@ -6,7 +6,6 @@ plugins {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.github.patrick.remapper'
-    def latestVersion = "1.21.4"
     def minecraftVersion
 
     if (project.name.startsWith("1")) {
@@ -18,7 +17,7 @@ subprojects {
         def parts = project.name.split("from_")
         minecraftVersion = parts[1]
     } else {
-        minecraftVersion = latestVersion
+        minecraftVersion = "1.21.7"
     }
 
 

@@ -1,19 +1,47 @@
 package it.jakegblp.nms.impl;
 
 import it.jakegblp.nms.api.NMSAdapter;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.server.level.ServerPlayer;
+import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Rotations;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.npc.VillagerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
-public final class v1_17 extends NMSAdapter<
-        ServerPlayer,
-        EntityDataSerializer<?>,
-        Packet<?>,
-        ClientboundAddEntityPacket,
-        ClientboundSetEntityDataPacket
-        > {
+import java.util.OptionalInt;
+import java.util.UUID;
+
+import static net.minecraft.network.syncher.EntityDataSerializers.*;
+
+public final class v1_17 extends NMSAdapter {
+
+    public v1_17() {
+        super();
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Byte.class), BYTE);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Integer.class), INT);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Float.class), FLOAT);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(String.class), STRING);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Component.class), COMPONENT);
+        registerOptionalEntityDataSerializer(EntitySerializerInfo.optional(Component.class), OPTIONAL_COMPONENT);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(ItemStack.class), ITEM_STACK);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Boolean.class), BOOLEAN);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Rotations.class), ROTATIONS);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(BlockPos.class), BLOCK_POS);
+        registerOptionalEntityDataSerializer(EntitySerializerInfo.optional(BlockPos.class), OPTIONAL_BLOCK_POS);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Direction.class), DIRECTION);
+        registerOptionalEntityDataSerializer(EntitySerializerInfo.optional(UUID.class), OPTIONAL_UUID);
+        registerOptionalEntityDataSerializer(EntitySerializerInfo.optional(BlockState.class), BLOCK_STATE);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(CompoundTag.class), COMPOUND_TAG);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(ParticleOptions.class), PARTICLE);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(VillagerData.class), VILLAGER_DATA);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(OptionalInt.class), OPTIONAL_UNSIGNED_INT);
+        registerEntityDataSerializer(EntitySerializerInfo.normal(Pose.class), POSE);
+    }
 
     public class NMSServerPlayer extends GenericNMSServerPlayer {
 

@@ -6,9 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.SynchedEntityData;
 import org.bukkit.entity.Entity;
 
-import static it.jakegblp.nms.api.NMSAdapter.nmsAdapter;
+import java.util.List;
+
+import static it.jakegblp.nms.api.NMSAdapter.NMS;
 
 /**
  * <a href="https://minecraft.wiki/w/Java_Edition_protocol/Packets#Set_Entity_Metadata">Entity Metadata Packet</a>
@@ -37,8 +41,26 @@ public final class EntityMetadataPacket<M extends EntityMetadata, E extends Enti
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ClientboundSetEntityDataPacket asNMS() {
-        return (ClientboundSetEntityDataPacket) nmsAdapter.entityMetadataPacketAdapter.to(this);
+        var a = NMS.entityMetadataPacketAdapter.to(this);
+        debugPacket(a);
+        return a;
+    }
+
+
+    public static void debugPacket(ClientboundSetEntityDataPacket packet) {
+        int entityId = packet.id();
+        List<SynchedEntityData.DataValue<?>> items = packet.packedItems();
+
+        System.out.println("Metadata packet for entity ID: " + entityId);
+        for (SynchedEntityData.DataValue<?> item : items) {
+            int index = item.id();
+            Object value = item.value();
+            EntityDataSerializer<?> serializer = item.serializer();
+
+            System.out.println(" - Index: " + index);
+            System.out.println("   Serializer: " + (serializer != null ? serializer.getClass().getSimpleName() : "null"));
+            System.out.println("   Value: " + value);
+        }
     }
 }

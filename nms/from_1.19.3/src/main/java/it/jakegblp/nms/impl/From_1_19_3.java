@@ -2,7 +2,8 @@ package it.jakegblp.nms.impl;
 
 import it.jakegblp.nms.api.EntityMetadataPacketAdapter;
 import it.jakegblp.nms.api.EntityTypeAdapter;
-import it.jakegblp.nms.api.entity.metadata.keys.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
+import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import it.jakegblp.nms.api.utils.SharedUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,11 +16,11 @@ import org.bukkit.Registry;
 import java.util.List;
 import java.util.Optional;
 
-import static it.jakegblp.nms.api.NMSAdapter.nmsAdapter;
-import static it.jakegblp.nms.api.entity.metadata.EntityDataSerializerInfo.Type.OPTIONAL;
+import static it.jakegblp.nms.api.NMSAdapter.NMS;
+import static it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo.Type.OPTIONAL;
 import static it.jakegblp.nms.api.utils.SharedUtils.asNMS;
 
-public class From_1_19_3 implements EntityTypeAdapter<EntityType<?>>, EntityMetadataPacketAdapter<ClientboundSetEntityDataPacket> {
+public class From_1_19_3 implements EntityTypeAdapter, EntityMetadataPacketAdapter {
 
     @Override
     public EntityType<?> from(org.bukkit.entity.EntityType from) {
@@ -33,21 +34,23 @@ public class From_1_19_3 implements EntityTypeAdapter<EntityType<?>>, EntityMeta
 
     @Override
     @SuppressWarnings("unchecked")
-    public ClientboundSetEntityDataPacket to(EntityMetadataPacket<?, ?> to) {
+    public ClientboundSetEntityDataPacket to(EntityMetadataPacket<?, ?> from) {
+        // todo: turn most of this into an util method
         return new ClientboundSetEntityDataPacket(
-                to.getEntityId(),
-                (List<SynchedEntityData.DataValue<?>>) (List<?>) to.getEntityMetadata().getMetadataItems().entrySet().stream()
+                from.getEntityId(),
+                (List<SynchedEntityData.DataValue<?>>) (List<?>) from.getEntityMetadata().getMetadataItems().entrySet().stream()
                         .filter(entry -> entry.getValue() != null)
                         .map(entry -> {
                             Object nmsValue = asNMS(entry.getValue());
                             MetadataKey<?, ?> key = entry.getKey();
+                            EntitySerializerInfo.Type type = key.getEntitySerializerInfo().serializerType();
                             return new SynchedEntityData.DataValue<>(
                                     key.getIndex(),
-                                    (EntityDataSerializer<Object>) nmsAdapter.getEntityDataSerializer(
-                                            SharedUtils.getAsSerializableType(nmsValue.getClass()),
-                                            key.getSerializationType()
+                                    (EntityDataSerializer<Object>) NMS.getEntityDataSerializer(
+                                            NMS.getSerializableClass(nmsValue.getClass()),
+                                            type
                                     ),
-                                    key.getSerializationType() == OPTIONAL ? Optional.of(nmsValue) : nmsValue);
+                                    type == OPTIONAL ? Optional.of(nmsValue) : nmsValue);
                         }).toList()
         );
     }

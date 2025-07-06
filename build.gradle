@@ -9,8 +9,6 @@ group = 'it.jakegblp'
 version = '1.0.0'
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
-
     project(':nms').subprojects.each { subproject ->
         implementation project(subproject.path)
     }
@@ -50,9 +48,10 @@ allprojects {
     }
 
     dependencies {
-        if (module == "common") {
-            compileOnly "org.spigotmc:spigot:1.21.4-R0.1-SNAPSHOT:remapped-mojang"
-        } else if (module != "shared") {
+        if (module == "common" || module == "NMS") {
+            compileOnly "org.spigotmc:spigot:1.21.7-R0.1-SNAPSHOT:remapped-mojang"
+        }
+        if (module != "shared" && module != "common") {
             implementation project(':common')
         }
 
@@ -66,6 +65,7 @@ allprojects {
         }
         compileOnly 'it.unimi.dsi:fastutil:8.5.15'
         implementation "net.kyori:adventure-platform-bukkit:4.4.0"
+        implementation "net.kyori:adventure-text-minimessage:4.23.0"
         implementation 'com.github.zafarkhaja:java-semver:0.10.2'
         implementation("org.jspecify:jspecify:1.0.0")
         compileOnly 'org.jetbrains:annotations:20.1.0'
