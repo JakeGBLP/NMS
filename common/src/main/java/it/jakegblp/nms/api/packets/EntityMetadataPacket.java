@@ -42,25 +42,6 @@ public final class EntityMetadataPacket<M extends EntityMetadata, E extends Enti
 
     @Override
     public ClientboundSetEntityDataPacket asNMS() {
-        var a = NMS.entityMetadataPacketAdapter.to(this);
-        debugPacket(a);
-        return a;
-    }
-
-
-    public static void debugPacket(ClientboundSetEntityDataPacket packet) {
-        int entityId = packet.id();
-        List<SynchedEntityData.DataValue<?>> items = packet.packedItems();
-
-        System.out.println("Metadata packet for entity ID: " + entityId);
-        for (SynchedEntityData.DataValue<?> item : items) {
-            int index = item.id();
-            Object value = item.value();
-            EntityDataSerializer<?> serializer = item.serializer();
-
-            System.out.println(" - Index: " + index);
-            System.out.println("   Serializer: " + (serializer != null ? serializer.getClass().getSimpleName() : "null"));
-            System.out.println("   Value: " + value);
-        }
+        return NMS.entityMetadataPacketAdapter.to(this);
     }
 }

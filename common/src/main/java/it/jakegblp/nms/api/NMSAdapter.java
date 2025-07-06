@@ -110,7 +110,6 @@ public abstract class NMSAdapter {
 
     @SuppressWarnings("unchecked")
     public <T> EntityDataSerializer<T> getEntityDataSerializer(Class<T> clazz, EntitySerializerInfo.Type type) {
-        Bukkit.getLogger().info("getEntityDataSerializer: " + clazz.getName() + ", " + type);
         EntityDataSerializer<T> entityDataSerializer = (EntityDataSerializer<T>) entityDataSerializerMap.get(new EntitySerializerInfo<>(clazz, type));
         Preconditions.checkNotNull(entityDataSerializer, "Could not find EntityDataSerializer for " + type + " " + clazz.getName());
         return entityDataSerializer;

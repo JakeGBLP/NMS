@@ -129,9 +129,6 @@ public interface ReflectionUtils {
 
     static Object invokeSafely(Method method, Object object, Object... args) {
         try {
-            Bukkit.getLogger().info("REFLECTION INVOKE: " + method.getName());
-            Bukkit.getLogger().info("REFLECTION INVOKE: " + Arrays.toString(args));
-
             return method.invoke(object, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
