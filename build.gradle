@@ -3,34 +3,43 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.3'
+    id 'io.github.patrick.remapper' version '1.4.2'
 }
 
 group = 'it.jakegblp'
 version = '1.0.0'
 
 dependencies {
-    project(':nms').subprojects.each { subproject ->
-        implementation project(subproject.path)
-    }
+    implementation project(":common")
+    implementation project(":factory")
     implementation "dev.jorel:commandapi-bukkit-shade:9.7.0"
     annotationProcessor "dev.jorel:commandapi-annotations:9.7.0"
 }
 
 allprojects {
     apply plugin: 'java'
+    apply plugin: 'io.github.patrick.remapper'
 
-    def module = project.name
+    def isNmsModule = true
+    def minecraftVersion
 
-    def javaVersion = 17
-            //module == "all" ? 21 :
-            //        ["common", "from", "to"].any { module.contains(it) } || module ==~ /1\.17(\.1)?/ ? 17 :
-            //                module ==~ /1\.(18|19|20)(\.[1-4])?/ ? 17 :
-            //                        module ==~ /1\.21(\.[1-4])?/ ? 21 :
-            //                                17
+    if (name.startsWith("1")) {
+        minecraftVersion = name
+    } else if (name.contains("to_")) {
+        def parts = name.split("to_")
+        minecraftVersion = parts[1]
+    } else if (name.contains("from_")) {
+        def parts = name.split("from_")
+        minecraftVersion = parts[1]
+    } else {
+        minecraftVersion = "1.21.7"
+        isNmsModule = false
+    }
 
+    def javaVersion = 21
 
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -48,21 +57,20 @@ allprojects {
     }
 
     dependencies {
-        if (module == "common" || module == "NMS") {
-            compileOnly "org.spigotmc:spigot:1.21.7-R0.1-SNAPSHOT:remapped-mojang"
-        }
-        if (module != "shared" && module != "common") {
-            implementation project(':common')
+        compileOnly "org.spigotmc:spigot:$minecraftVersion-R0.1-SNAPSHOT:remapped-mojang"
+
+        if (name == "factory" || name == "NMS" || isNmsModule) {
+            implementation project(":common")
         }
 
-        def isImplementationModule = module.contains("from") || module.contains("to")
-
-        if (!isImplementationModule && module != "shared" && module != "api") {
-            rootProject.subprojects.each { sub ->
-                if ((module == "common" && sub.name == "shared") || (module != "common" && (sub.name.contains("from") || sub.name.contains("to"))))
-                    implementation project(sub.path)
+        if (name == "factory") {
+            rootProject.subprojects.each {
+                if (it.path.startsWith(":nms:")) {
+                    implementation project(it.path)
+                }
             }
         }
+
         compileOnly 'it.unimi.dsi:fastutil:8.5.15'
         implementation "net.kyori:adventure-platform-bukkit:4.4.0"
         implementation "net.kyori:adventure-text-minimessage:4.23.0"
@@ -76,16 +84,18 @@ allprojects {
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
     }
 
-    shadowJar {
-        dependencies {
-            exclude(dependency('org.projectlombok:lombok'))
-            exclude(dependency('org.jetbrains:annotations'))
+    tasks {
+        remap {
+            setVersion(minecraftVersion)
         }
+    }
+
+    shadowJar {
         archiveClassifier.set("")
     }
 
     build {
-        dependsOn shadowJar
+        dependsOn shadowJar, tasks.remap
     }
 }
 
@@ -96,7 +106,6 @@ processResources {
 }
 
 shadowJar {
-    relocate("io.papermc.lib", "it.jakegblp.nms.libraries.paperlib")
     relocate("dev.jorel.commandapi", "it.jakegblp.nms.libraries.commandapi")
 }
 

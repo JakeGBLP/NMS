@@ -6,3 +6,4 @@ file('nms').listFiles()?.each { dir ->
     }
 }
 include ':common'
+include ':factory'
