@@ -60,7 +60,7 @@ allprojects {
         if (!isImplementationModule && module != "shared" && module != "api") {
             rootProject.subprojects.each { sub ->
                 if ((module == "common" && sub.name == "shared") || (module != "common" && (sub.name.contains("from") || sub.name.contains("to"))))
-                    implementation project(":nms:${sub.name}")
+                    implementation project(sub.path)
             }
         }
         compileOnly 'it.unimi.dsi:fastutil:8.5.15'

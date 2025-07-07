@@ -34,6 +34,8 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
 @Getter
 public class NMS extends JavaPlugin {
 
+    private static int randomID;
+
     public static NMS instance;
     public static final Random RANDOM = new Random();
 
@@ -66,7 +68,7 @@ public class NMS extends JavaPlugin {
                             getLogger().info("Spawned fake "+entityType+" at "+player.getName()+"'s location.");
                             Location location = player.getLocation();
                             NMSApi.sendPacket(player, new EntitySpawnPacket(
-                                    NMSApi.generateRandomId(),
+                                    generateRandomId(),
                                     UUID.randomUUID(),
                                     location.getX(),
                                     location.getY(),
@@ -88,7 +90,7 @@ public class NMS extends JavaPlugin {
                             } else {
                                 name = Component.text("Hello").color(NamedTextColor.RED);
                             }
-                            int id = NMSApi.getLastRandomID();
+                            int id = getLastRandomID();
                             player.sendMessage("Changed entity metadata of entity with id "+id);
                             getLogger().info("Changed entity metadata of entity with id "+id);
                             LivingEntityMetadata metadata = new LivingEntityMetadata();
@@ -127,6 +129,15 @@ public class NMS extends JavaPlugin {
             throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
         }
         return NMS.adventure;
+    }
+
+    public int generateRandomId() {
+        randomID = RANDOM.nextInt();
+        return randomID;
+    }
+
+    public static int getLastRandomID() {
+        return randomID;
     }
 
 }

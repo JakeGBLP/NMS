@@ -20,7 +20,6 @@ subprojects {
         minecraftVersion = "1.21.7"
     }
 
-
     repositories {
         mavenCentral()
         mavenLocal()
@@ -33,6 +32,13 @@ subprojects {
             implementation(project(":nms:shared"))
             if (project.name != "api") {
                 implementation(project(":nms:api"))
+            }
+        }
+        if (project.name == "factory") {
+            for (final def sub in rootProject.subprojects) {
+                if (sub.path.startsWith(":nms:") && sub.name != "factory")
+                    print sub.path
+                    implementation project(sub.path)
             }
         }
         compileOnly "org.spigotmc:spigot:$minecraftVersion-R0.1-SNAPSHOT:remapped-mojang"
