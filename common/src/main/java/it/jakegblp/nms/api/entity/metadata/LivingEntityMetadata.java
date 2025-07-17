@@ -7,14 +7,10 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pose;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-
-import static it.jakegblp.nms.api.entity.metadata.key.MetadataKeyRegistry.LivingEntityKeys.keys;
 import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 
 @Getter
@@ -75,21 +71,6 @@ public class LivingEntityMetadata extends EntityMetadata implements LivingEntity
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T get(MetadataKey<? extends Entity, T> key) {
-        return (T) switch (key.getIndex()) {
-            case 8 -> handStates;
-            case 9 -> health;
-            case 10 -> potionEffectColor;
-            case 11 -> potionEffectAmbient;
-            case 12 -> arrowCount;
-            case 13 -> beeStingerCount;
-            case 14 -> sleepingBedLocation;
-            default -> super.get(key);
-        };
-    }
-
-    @Override
     public <T> void set(MetadataKey<? extends Entity, T> key, @Nullable T value) {
         switch (key.getIndex()) {
             case 8 -> handStates = (HandStates) value;
@@ -104,16 +85,7 @@ public class LivingEntityMetadata extends EntityMetadata implements LivingEntity
     }
 
     @Override
-    public Map<MetadataKey<? extends Entity, ?>, Object> getMetadataItems() {
-        var map = super.getMetadataItems();
-        for (MetadataKey<LivingEntity, ?> key : keys())
-            map.put(key, get(key));
-        return map;
-    }
-
-    @Override
     public LivingEntityMetadata clone() {
-        LivingEntityMetadata metadata = (LivingEntityMetadata) super.clone();
         return new LivingEntityMetadata(this);
     }
 }

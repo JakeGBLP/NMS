@@ -11,10 +11,10 @@ import org.bukkit.entity.Pose;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static it.jakegblp.nms.api.entity.metadata.key.MetadataKeyRegistry.EntityKeys.keys;
 import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 
 /**
@@ -23,7 +23,6 @@ import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 @Getter
 @Setter
 @AllArgsConstructor
-@SuppressWarnings("unchecked")
 @SuperBuilder(toBuilder = true)
 public class EntityMetadata implements EntityMetadataView, Cloneable {
 
@@ -63,22 +62,6 @@ public class EntityMetadata implements EntityMetadataView, Cloneable {
         );
     }
 
-    @Override
-    public <T> T get(MetadataKey<? extends Entity, T> key) {
-        return (T) switch (key.getIndex()) {
-            case 0 -> entityFlags;
-            case 1 -> airTicks;
-            case 2 -> customName;
-            case 3 -> customNameVisible;
-            case 4 -> silent;
-            case 5 -> noGravity;
-            case 6 -> pose;
-            case 7 -> ticksFrozen;
-            default ->
-                    throw new IllegalArgumentException("Unrecognized key with index " + key.getIndex() + " for " + this.getClass().getSimpleName() + " metadata.");
-        };
-    }
-
     public <T> void set(MetadataKey<? extends Entity, T> key, @Nullable T value) {
         switch (key.getIndex()) {
             case 0 -> entityFlags = (EntityFlags) value;
@@ -95,9 +78,16 @@ public class EntityMetadata implements EntityMetadataView, Cloneable {
     }
 
     public Map<MetadataKey<? extends Entity, ?>, Object> getMetadataItems() {
+        return getMetadataItems(keys());
+    }
+
+    public Map<MetadataKey<? extends Entity, ?>, Object> getMetadataItems(List<? extends MetadataKey<? extends Entity,?>> keys) {
         Map<MetadataKey<? extends Entity, ?>, Object> map = new TreeMap<>(Comparator.comparingInt(MetadataKey::getIndex));
-        for (MetadataKey<Entity, ?> key : keys())
-            map.put(key, get(key));
+        for (MetadataKey<? extends Entity, ?> key : keys) {
+            Object value = get(key);
+            if (value != null)
+                map.put(key, value);
+        }
         return map;
     }
 

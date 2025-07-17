@@ -9,10 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pose;
 import org.bukkit.util.BlockVector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class MetadataKeyRegistry {
     private static final Map<Class<? extends Entity>, List<MetadataKey<?, ?>>> keysByClass = new HashMap<>();
@@ -23,26 +20,39 @@ public final class MetadataKeyRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> List<MetadataKey<E, ?>> getAllFor(Class<E> entityClass) {
-        List<MetadataKey<E, ?>> result = new ArrayList<>();
-        Class<?> current = entityClass;
+    public static <E extends Entity> List<MetadataKey<E, ?>> getAllFor(Class<E> entityClass, boolean includeSuperTypes) {
+        Set<MetadataKey<E, ?>> result = new TreeSet<>(Comparator.comparingInt(MetadataKey::getIndex));
+        Queue<Class<?>> queue = new ArrayDeque<>();
+        queue.add(entityClass);
 
-        while (current != null) {
+        while (!queue.isEmpty()) {
+            Class<?> current = queue.poll();
             List<MetadataKey<?, ?>> keys = keysByClass.get(current);
-            if (keys != null) {
-                for (MetadataKey<?, ?> key : keys) {
+            if (keys != null)
+                for (MetadataKey<?, ?> key : keys)
                     result.add((MetadataKey<E, ?>) key);
-                }
+            if (includeSuperTypes) {
+                Class<?> superclass = current.getSuperclass();
+                if (superclass != null && Entity.class.isAssignableFrom(superclass))
+                    queue.add(superclass);
+                for (Class<?> interfaceClass : current.getInterfaces())
+                    if (Entity.class.isAssignableFrom(interfaceClass))
+                        queue.add(interfaceClass);
             }
-            current = current.getSuperclass();
         }
 
-        return result;
+        return new ArrayList<>(result);
     }
+
+    public static <E extends Entity> List<MetadataKey<E, ?>> getAllFor(Class<E> entityClass) {
+        return getAllFor(entityClass, false);
+    }
+
     public static void init() {
         EntityKeys.init();
         LivingEntityKeys.init();
     }
+
     public static final class EntityKeys {
         public static final MetadataKey<Entity, EntityFlags> ENTITY_FLAGS = register(new MetadataKey<>(Entity.class, 0, new EntityFlags()));
         public static final MetadataKey<Entity, Integer> AIR_TICKS = register(new MetadataKey<>(Entity.class, 1, 300));
@@ -61,7 +71,7 @@ public final class MetadataKeyRegistry {
     }
 
     public static final class LivingEntityKeys {
-        public static final MetadataKey<LivingEntity, HandStates> HAND_STATES = register(new MetadataKey<>(LivingEntity.class, 8,new HandStates()));
+        public static final MetadataKey<LivingEntity, HandStates> HAND_STATES = register(new MetadataKey<>(LivingEntity.class, 8, new HandStates()));
         public static final MetadataKey<LivingEntity, Float> HEALTH = register(new MetadataKey<>(LivingEntity.class, 9, 1f));
         public static final MetadataKey<LivingEntity, Integer> POTION_EFFECT_COLOR = register(new MetadataKey<>(LivingEntity.class, 10, 0));
         public static final MetadataKey<LivingEntity, Boolean> POTION_EFFECT_AMBIENT = register(new MetadataKey<>(LivingEntity.class, 11, false));

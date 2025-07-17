@@ -50,7 +50,11 @@ public class NMS extends JavaPlugin {
     public void onEnable() {
         CommandAPI.onEnable();
         instance = this;
-        Version version = Version.parse(Bukkit.getBukkitVersion()).toStableVersion();
+        String[] parts = Bukkit.getBukkitVersion().split("[^\\d.]")[0].split("\\.");
+        int major = parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
+        int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+        Version version = Version.of(major, minor, patch);
         NMS = NMSFactory.createNMS(this, version);
 
         new CommandAPICommand("nms")
@@ -119,8 +123,10 @@ public class NMS extends JavaPlugin {
     @Override
     public void onDisable() {
         CommandAPI.onDisable();
-        NMS.disable();
-        NMS = null;
+        if (NMS != null) {
+            NMS.disable();
+            NMS = null;
+        }
         getLogger().info("NMS has been disabled!");
     }
 

@@ -28,13 +28,14 @@ public interface ReflectionUtils {
     static Constructor<?> getDeclaredConstructor(Class<?> clazz, Class<?>... parameterTypes) {
         return CACHED_CONSTRUCTORS.computeIfAbsent(clazz, key -> {
             try {
-                return clazz.getDeclaredConstructor(parameterTypes);
+                return key.getDeclaredConstructor(parameterTypes);
             } catch (NoSuchMethodException e) {
                 Bukkit.getLogger().severe("REFLECTION ERROR: " + e.getMessage());
                 return null;
             }
         });
     }
+
     static Constructor<?> getPrivateDeclaredConstructor(Class<?> clazz, Class<?>... parameterTypes) {
         Constructor<?> constructor = getDeclaredConstructor(clazz, parameterTypes);
         if (constructor == null) return null;
@@ -42,11 +43,22 @@ public interface ReflectionUtils {
         return constructor;
     }
 
-
-    static Class<?> getClass(String name) {
+    static Class<?> forClassName(String name) {
         return CACHED_CLASSES.computeIfAbsent(name, key -> {
             try {
-                return Class.forName(key);
+                return Class.forName(name);
+            } catch (ClassNotFoundException e) {
+                Bukkit.getLogger().severe("REFLECTION ERROR: " + e.getMessage());
+                return null;
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    static Class<Enum<?>> forEnumClassName(String name) {
+        return (Class<Enum<?>>) CACHED_CLASSES.computeIfAbsent(name, key -> {
+            try {
+                return Class.forName(name);
             } catch (ClassNotFoundException e) {
                 Bukkit.getLogger().severe("REFLECTION ERROR: " + e.getMessage());
                 return null;

@@ -2,7 +2,6 @@ package it.jakegblp.nms.api.packets;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
@@ -16,7 +15,7 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
  */
 @Getter
 @Setter
-public class EntitySpawnPacket extends EntityPacket<ClientboundAddEntityPacket> {
+public class EntitySpawnPacket extends EntityPacket {
 
     private UUID entityUUID;
     private double x;
@@ -109,7 +108,7 @@ public class EntitySpawnPacket extends EntityPacket<ClientboundAddEntityPacket> 
 
 
     @Override
-    public ClientboundAddEntityPacket asNMS() {
-        return NMS.entitySpawnPacketAdapter.to(this);
+    public Object asNMS() {
+        return NMS.toNMSEntitySpawnPacket(this);
     }
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class EntityPacket<P extends net.minecraft.network.protocol.Packet<?>> extends Packet<P> {
+public abstract class EntityPacket extends Packet {
     protected int entityId;
 
     protected EntityPacket(int entityId) {

@@ -18,7 +18,7 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @SinceMinecraft(version = "1.21.2")
-public class PlayerRotationPacket extends Packet<ClientboundPlayerRotationPacket> implements Exceptionable<UnsupportedOperationException> {
+public class PlayerRotationPacket extends Packet implements Exceptionable<UnsupportedOperationException> {
     private float yaw, pitch;
 
     /**

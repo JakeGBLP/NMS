@@ -5,12 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.network.syncher.SynchedEntityData;
 import org.bukkit.entity.Entity;
-
-import java.util.List;
 
 import static it.jakegblp.nms.api.NMSAdapter.NMS;
 
@@ -21,7 +16,7 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = false)
-public final class EntityMetadataPacket<M extends EntityMetadata, E extends Entity> extends EntityPacket<ClientboundSetEntityDataPacket> {
+public final class EntityMetadataPacket<M extends EntityMetadata, E extends Entity> extends EntityPacket {
     private Class<E> target;
     private M entityMetadata;
 
@@ -41,7 +36,7 @@ public final class EntityMetadataPacket<M extends EntityMetadata, E extends Enti
     }
 
     @Override
-    public ClientboundSetEntityDataPacket asNMS() {
-        return NMS.entityMetadataPacketAdapter.to(this);
+    public Object asNMS() {
+        return NMS.toNMSEntityMetadataPacket(this);
     }
 }
