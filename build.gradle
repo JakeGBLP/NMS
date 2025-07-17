@@ -45,16 +45,6 @@ processResources {
 
 shadowJar {
     archiveClassifier.set("")
-    rootProject.subprojects.each { sub ->
-        if (sub.path.startsWith(":nms:") && sub.path.contains(".")) {
-            // Derive original and relocated packages
-            def version = sub.name.replace('.', '_')
-            def originalPkg = "it.jakegblp.nms.impl.${version}"               // adjust base
-            def relocatedPkg = "your.plugin.nms.shadowed.${version}" // adjust base
-
-            relocate(originalPkg, relocatedPkg)
-        }
-    }
     relocate("dev.jorel.commandapi", "it.jakegblp.nms.libraries.commandapi")
     relocate("net.kyori.adventure", "it.jakegblp.nms.libraries.adventure")
     relocate("net.kyori.option", "it.jakegblp.nms.libraries.option")
