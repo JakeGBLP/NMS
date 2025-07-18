@@ -1,8 +1,11 @@
-package it.jakegblp.nms.api.entity.metadata;
+package it.jakegblp.nms.api.entity.metadata.entity.livingentity;
 
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.entity.EntityFlags;
+import it.jakegblp.nms.api.entity.metadata.entity.EntityMetadata;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import net.kyori.adventure.text.Component;
@@ -16,6 +19,7 @@ import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public class LivingEntityMetadata extends EntityMetadata implements LivingEntityMetadataView, Cloneable {
 
@@ -26,11 +30,6 @@ public class LivingEntityMetadata extends EntityMetadata implements LivingEntity
     protected @Nullable Integer arrowCount;
     protected @Nullable Integer beeStingerCount;
     protected @Nullable BlockVector sleepingBedLocation;
-
-    /**
-     * Creates an entity metadata instance where all values are null.
-     */
-    public LivingEntityMetadata() {}
 
     public LivingEntityMetadata(LivingEntityMetadataView view) {
         super(view);
@@ -84,6 +83,7 @@ public class LivingEntityMetadata extends EntityMetadata implements LivingEntity
         }
     }
 
+    @SuppressWarnings("CloneDoesntCallSuperClone")
     @Override
     public LivingEntityMetadata clone() {
         return new LivingEntityMetadata(this);

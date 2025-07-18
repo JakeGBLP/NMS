@@ -1,9 +1,9 @@
-package it.jakegblp.nms.api.entity.metadata.key;
+package it.jakegblp.nms.api.entity.metadata;
 
-import it.jakegblp.nms.api.entity.metadata.EntityFlags;
-import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
-import it.jakegblp.nms.api.entity.metadata.HandStates;
+import it.jakegblp.nms.api.entity.metadata.entity.EntityFlags;
+import it.jakegblp.nms.api.entity.metadata.entity.livingentity.HandStates;
 import net.kyori.adventure.text.Component;
+import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pose;
@@ -81,6 +81,18 @@ public final class MetadataKeyRegistry {
 
         public static List<MetadataKey<LivingEntity, ?>> keys() {
             return MetadataKeyRegistry.getAllFor(LivingEntity.class);
+        }
+
+        public static void init() {}
+    }
+
+    public static final class AreaEffectCloudKeys {
+        public static final MetadataKey<AreaEffectCloud, Float> HEALTH = register(new MetadataKey<>(AreaEffectCloud.class, 8, 3f));
+        public static final MetadataKey<AreaEffectCloud, Boolean> POTION_EFFECT_AMBIENT = register(new MetadataKey<>(AreaEffectCloud.class, 9, false));
+        public static final MetadataKey<AreaEffectCloud, Integer> ARROW_COUNT = register(new MetadataKey<>(AreaEffectCloud.class, 10, -1));
+
+        public static List<MetadataKey<AreaEffectCloud, ?>> keys() {
+            return MetadataKeyRegistry.getAllFor(AreaEffectCloud.class);
         }
 
         public static void init() {}

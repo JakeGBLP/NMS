@@ -1,8 +1,9 @@
-package it.jakegblp.nms.api.entity.metadata;
+package it.jakegblp.nms.api.entity.metadata.entity;
 
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import net.kyori.adventure.text.Component;
@@ -23,6 +24,7 @@ import static it.jakegblp.nms.api.utils.NullabilityUtils.cloneIfNotNull;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public class EntityMetadata implements EntityMetadataView, Cloneable {
 
@@ -42,12 +44,6 @@ public class EntityMetadata implements EntityMetadataView, Cloneable {
     protected Pose pose;
     @Nullable
     protected Integer ticksFrozen;
-
-    /**
-     * Creates an entity metadata instance where all values are null.
-     */
-    public EntityMetadata() {
-    }
 
     public EntityMetadata(EntityMetadataView view) {
         this(
@@ -91,6 +87,7 @@ public class EntityMetadata implements EntityMetadataView, Cloneable {
         return map;
     }
 
+    @SuppressWarnings("CloneDoesntCallSuperClone")
     @Override
     public EntityMetadata clone() {
         return new EntityMetadata(this);

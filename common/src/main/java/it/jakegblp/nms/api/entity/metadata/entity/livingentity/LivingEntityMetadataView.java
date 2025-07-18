@@ -1,6 +1,7 @@
-package it.jakegblp.nms.api.entity.metadata;
+package it.jakegblp.nms.api.entity.metadata.entity.livingentity;
 
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.entity.EntityMetadataView;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockVector;

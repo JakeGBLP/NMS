@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import io.netty.buffer.Unpooled;
 import it.jakegblp.nms.api.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import it.jakegblp.nms.api.packets.EntitySpawnPacket;
 import lombok.Getter;

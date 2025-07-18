@@ -3,7 +3,7 @@ package it.jakegblp.nms.api;
 import com.google.common.base.Preconditions;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import it.jakegblp.nms.api.entity.metadata.Flags;
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
 import lombok.experimental.Delegate;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
@@ -38,6 +38,8 @@ public abstract class NMSAdapter<
     public EntityMetadataPacketAdapter entityMetadataPacketAdapter;
     @Delegate
     public PlayerRotationPacketAdapter playerRotationPacketAdapter = null;
+    @Delegate
+    public BundleDelimiterPacketAdapter bundleDelimiterPacketAdapter = null;
     public BukkitAudiences adventure;
 
     public final Map<EntitySerializerInfo, EntityDataSerializer> entityDataSerializerMap = new HashMap<>();

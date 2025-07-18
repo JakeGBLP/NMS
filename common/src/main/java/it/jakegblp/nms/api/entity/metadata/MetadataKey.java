@@ -1,6 +1,5 @@
-package it.jakegblp.nms.api.entity.metadata.key;
+package it.jakegblp.nms.api.entity.metadata;
 
-import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.entity.Entity;

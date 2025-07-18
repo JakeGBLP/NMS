@@ -67,6 +67,4 @@ public final class v1_21_4 extends NMSAdapter<
         registerEntityDataSerializer(EntitySerializerInfo.normal(Quaternionf.class), QUATERNION);
     }
 
-
-
 }

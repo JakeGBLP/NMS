@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
 
 import static it.jakegblp.nms.api.NMSAdapter.NMS;
 
@@ -18,7 +17,7 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @SinceMinecraft(version = "1.21.2")
-public class PlayerRotationPacket extends Packet implements Exceptionable<UnsupportedOperationException> {
+public class PlayerRotationPacket extends ClientboundPacket implements Exceptionable<UnsupportedOperationException> {
     private float yaw, pitch;
 
     /**
@@ -34,9 +33,9 @@ public class PlayerRotationPacket extends Packet implements Exceptionable<Unsupp
      * @throws UnsupportedOperationException if the server version is below 1.21.2
      */
     @Override
-    public ClientboundPlayerRotationPacket asNMS() {
+    public Object asNMS() {
         validate();
-        return new ClientboundPlayerRotationPacket(yaw, pitch);
+        return NMS.playerRotationPacketAdapter.to(this);
     }
 
     /**

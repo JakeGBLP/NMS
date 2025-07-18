@@ -1,7 +1,7 @@
 package it.jakegblp.nms.api.utils;
 
-import it.jakegblp.nms.api.entity.metadata.EntityFlags;
-import it.jakegblp.nms.api.entity.metadata.HandStates;
+import it.jakegblp.nms.api.entity.metadata.entity.EntityFlags;
+import it.jakegblp.nms.api.entity.metadata.entity.livingentity.HandStates;
 import org.bukkit.util.BlockVector;
 
 public class NullabilityUtils {

@@ -1,7 +1,7 @@
-package it.jakegblp.nms.api.entity.metadata;
+package it.jakegblp.nms.api.entity.metadata.entity;
 
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKeyRegistry;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.MetadataKeyRegistry;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pose;

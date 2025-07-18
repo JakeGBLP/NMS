@@ -15,8 +15,9 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
  */
 @Getter
 @Setter
-public class EntitySpawnPacket extends EntityPacket {
+public class EntitySpawnPacket extends ClientboundPacket {
 
+    private int entityId;
     private UUID entityUUID;
     private double x;
     private double y;
@@ -29,7 +30,7 @@ public class EntitySpawnPacket extends EntityPacket {
     private double headYaw;
 
     public EntitySpawnPacket(
-            int id,
+            int entityId,
             UUID entityUUID,
             double x,
             double y,
@@ -40,7 +41,7 @@ public class EntitySpawnPacket extends EntityPacket {
             int data,
             Vector velocity,
             double headYaw) {
-        super(id);
+        this.entityId = entityId;
         this.entityUUID = entityUUID;
         this.x = x;
         this.y = y;

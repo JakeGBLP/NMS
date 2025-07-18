@@ -3,7 +3,7 @@ package it.jakegblp.nms.impl.from_1_18_to_1_19_1;
 import it.jakegblp.nms.api.EntityMetadataPacketAdapter;
 import it.jakegblp.nms.api.EntityTypeAdapter;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKey;
+import it.jakegblp.nms.api.entity.metadata.MetadataKey;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;

@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.packets;
 
-import it.jakegblp.nms.api.entity.metadata.EntityMetadata;
+import it.jakegblp.nms.api.entity.metadata.entity.EntityMetadata;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +16,8 @@ import static it.jakegblp.nms.api.NMSAdapter.NMS;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = false)
-public final class EntityMetadataPacket<M extends EntityMetadata, E extends Entity> extends EntityPacket {
+public final class EntityMetadataPacket<M extends EntityMetadata, E extends Entity> extends ClientboundPacket {
+    private int entityId;
     private Class<E> target;
     private M entityMetadata;
 
@@ -30,7 +31,7 @@ public final class EntityMetadataPacket<M extends EntityMetadata, E extends Enti
             Class<E> target,
             M entityMetadata
     ) {
-        super(id);
+        this.entityId = id;
         this.target = target;
         this.entityMetadata = entityMetadata;
     }

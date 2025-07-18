@@ -1,4 +1,7 @@
-package it.jakegblp.nms.api.entity.metadata;
+package it.jakegblp.nms.api.entity.metadata.entity;
+
+import it.jakegblp.nms.api.entity.metadata.Flags;
+
 /**
  * Wrapper for the entity metadata bitmask at index 0.<br>
  * <a href="https://minecraft.wiki/w/Java_Edition_protocol/Entity_metadata#Entity">Minecraft Wiki – Entity Metadata</a>

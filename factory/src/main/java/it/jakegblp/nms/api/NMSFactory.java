@@ -1,13 +1,14 @@
 package it.jakegblp.nms.api;
 
 import com.github.zafarkhaja.semver.Version;
-import it.jakegblp.nms.api.entity.metadata.key.MetadataKeyRegistry;
+import it.jakegblp.nms.api.entity.metadata.MetadataKeyRegistry;
 import it.jakegblp.nms.impl.from_1_18.From_1_18;
 import it.jakegblp.nms.impl.from_1_18_to_1_18_2.From_1_18_To_1_18_2;
 import it.jakegblp.nms.impl.from_1_18_to_1_19_1.From_1_18_To_1_19_1;
 import it.jakegblp.nms.impl.from_1_18_to_1_20_6.From_1_18_To_1_20_6;
 import it.jakegblp.nms.impl.from_1_19.From_1_19;
 import it.jakegblp.nms.impl.from_1_19_3.From_1_19_3;
+import it.jakegblp.nms.impl.from_1_19_4.From_1_19_4;
 import it.jakegblp.nms.impl.from_1_21_1.From_1_21_1;
 import it.jakegblp.nms.impl.from_1_21_3.From_1_21_3;
 import it.jakegblp.nms.impl.to_1_17_1.To_1_17_1;
@@ -135,6 +136,9 @@ public class NMSFactory {
 
                 if (minecraftVersion.isHigherThanOrEquivalentTo(of(1, 21, 3)))
                     NMS.playerRotationPacketAdapter = new From_1_21_3();
+
+                if (minecraftVersion.isHigherThanOrEquivalentTo(of(1, 19, 4)))
+                    NMS.bundleDelimiterPacketAdapter = new From_1_19_4();
             }
         } else {
             NMS = null;

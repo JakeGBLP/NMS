@@ -1,4 +1,6 @@
-package it.jakegblp.nms.api.entity.metadata;
+package it.jakegblp.nms.api.entity.metadata.entity;
+
+import it.jakegblp.nms.api.entity.metadata.BitFlag;
 
 public enum EntityFlag implements BitFlag {
     ON_FIRE((byte) 0x01),
