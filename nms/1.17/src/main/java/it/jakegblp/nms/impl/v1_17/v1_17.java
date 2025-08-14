@@ -1,6 +1,7 @@
 package it.jakegblp.nms.impl.v1_17;
 
-import it.jakegblp.nms.api.NMSAdapter;
+import it.jakegblp.nms.api.AbstractNMS;
+import it.jakegblp.nms.api.adapters.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
@@ -13,18 +14,23 @@ import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.IBlockData;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.OptionalInt;
 import java.util.UUID;
 
 import static net.minecraft.network.syncher.DataWatcherRegistry.*;
 
-public final class v1_17 extends NMSAdapter<
+public final class v1_17 extends AbstractNMS<
         DataWatcherSerializer<?>
         > {
 
-    public v1_17() {
-        super();
+    public v1_17(JavaPlugin plugin, EntityTypeAdapter<?> entityTypeAdapter, MajorChangesAdapter<?, ?, ?, ?, ?, ?, ?, ?, ?> majorChangesAdapter, ResourceLocationAdapter<?> resourceLocationAdapter, EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter, EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter, PlayerRotationPacketAdapter playerRotationPacketAdapter, BundleDelimiterPacketAdapter<?> bundleDelimiterPacketAdapter) {
+        super(plugin, entityTypeAdapter, majorChangesAdapter, resourceLocationAdapter, entitySpawnPacketAdapter, entityMetadataPacketAdapter, playerRotationPacketAdapter, bundleDelimiterPacketAdapter);
+    }
+
+    @Override
+    public void init() {
         registerEntityDataSerializer(EntitySerializerInfo.normal(Byte.class), a);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Integer.class), b);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Float.class), c);
@@ -45,7 +51,4 @@ public final class v1_17 extends NMSAdapter<
         registerEntityDataSerializer(EntitySerializerInfo.normal(OptionalInt.class), r);
         registerEntityDataSerializer(EntitySerializerInfo.normal(EntityPose.class), s);
     }
-
-
-
 }

@@ -2,12 +2,18 @@ package it.jakegblp.nms.impl.from_1_18;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import it.jakegblp.nms.api.ConversionAdapter;
+import io.netty.channel.Channel;
+import it.jakegblp.nms.api.adapters.MajorChangesAdapter;
+import it.jakegblp.nms.api.packets.BlockDestructionPacket;
 import lombok.Getter;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.entity.Player;
@@ -16,19 +22,17 @@ import org.bukkit.util.Vector;
 
 @Getter
 public class From_1_18 implements
-        ConversionAdapter<
-                Vec3,
-                BlockPos,
-                ServerPlayer,
-                Pose,
-                Component,
-                Packet<?>
-                > {
+        MajorChangesAdapter<Vec3, BlockPos, ServerPlayer, Pose, Component, Packet, ServerGamePacketListenerImpl, Connection, ClientboundBlockDestructionPacket> {
 
     private final BiMap<org.bukkit.entity.Pose, Pose> poseMap;
 
     public From_1_18() {
         poseMap = ImmutableBiMap.of(org.bukkit.entity.Pose.SNEAKING, Pose.CROUCHING);
+    }
+
+    @Override
+    public Class<Packet> getNMSPacketClass() {
+        return Packet.class;
     }
 
     @Override
@@ -87,12 +91,52 @@ public class From_1_18 implements
     }
 
     @Override
+    public ServerGamePacketListenerImpl getPlayerConnection(ServerPlayer serverPlayer) {
+        return serverPlayer.connection;
+    }
+
+    @Override
     public Class<Component> getNMSComponentClass() {
         return Component.class;
     }
 
     @Override
-    public void sendPacket(ServerPlayer serverPlayer, Packet<?> packet) {
-        serverPlayer.connection.send(packet);
+    public void sendPacketInternal(ServerGamePacketListenerImpl serverGamePacketListener, Packet packet) {
+        serverGamePacketListener.send(packet);
+    }
+
+    @Override
+    public Connection getConnection(ServerGamePacketListenerImpl serverGamePacketListener) {
+        return serverGamePacketListener.connection;
+    }
+
+    @Override
+    public Channel getChannel(Connection connection) {
+        return connection.channel;
+    }
+
+    @Override
+    public Component asNMSComponent(net.kyori.adventure.text.Component component) {
+        return Component.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
+    }
+
+    @Override
+    public net.kyori.adventure.text.Component asComponent(Component component) {
+        return GsonComponentSerializer.gson().deserialize(Component.Serializer.toJson(component));
+    }
+
+    @Override
+    public ClientboundBlockDestructionPacket toNMSBlockDestructionPacket(BlockDestructionPacket from) {
+        return new ClientboundBlockDestructionPacket(from.getEntityId(), asNMSBlockVector(from.getPosition()), from.getBlockDestructionStage());
+    }
+
+    @Override
+    public BlockDestructionPacket fromNMSBlockDestructionPacket(ClientboundBlockDestructionPacket from) {
+        return new BlockDestructionPacket(from.getId(), asBlockVector(from.getPos()), from.getProgress());
+    }
+
+    @Override
+    public Class<ClientboundBlockDestructionPacket> getNMSBlockDestructionPacketClass() {
+        return ClientboundBlockDestructionPacket.class;
     }
 }

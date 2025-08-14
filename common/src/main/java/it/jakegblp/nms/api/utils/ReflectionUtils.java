@@ -10,14 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public interface ReflectionUtils {
 
-    record MethodKey(Class<?> clazz, String name, List<Class<?>> parameterTypes) {
-        public MethodKey(Class<?> clazz, String name, Class<?>... parameterTypes) {
-            this(clazz, name, Arrays.asList(parameterTypes.clone()));
-        }
-    }
-
-    record FieldKey(Class<?> clazz, String name) {}
-
     Map<String, Class<?>> CACHED_CLASSES = new ConcurrentHashMap<>();
     Map<Class<?>, Constructor<?>> CACHED_CONSTRUCTORS = new ConcurrentHashMap<>();
     Map<MethodKey, Method> CACHED_METHODS = new ConcurrentHashMap<>();
@@ -100,16 +92,24 @@ public interface ReflectionUtils {
     }
 
     static Field getDeclaredField(Class<?> clazz, String name) {
-        return CACHED_DECLARED_FIELDS.computeIfAbsent(new FieldKey(clazz, name), key -> {
+        return getDeclaredField(clazz, name, false);
+    }
+
+    static Field getStaticDeclaredField(Class<?> clazz, String name) {
+        return getDeclaredField(clazz, name, true);
+    }
+
+    static Field getDeclaredField(Class<?> clazz, String name, boolean isStatic) {
+        return CACHED_DECLARED_FIELDS.computeIfAbsent(new FieldKey(clazz, name, isStatic), key -> {
             try {
-                return clazz.getDeclaredField(name);
+                Field field = clazz.getDeclaredField(name);
+                return Modifier.isStatic(field.getModifiers()) == isStatic ? field : null;
             } catch (NoSuchFieldException e) {
                 Bukkit.getLogger().severe("REFLECTION ERROR: " + e.getMessage());
                 return null;
             }
         });
     }
-
 
     static Object getFieldValueSafely(Field field, Object object) {
         try {
@@ -165,5 +165,18 @@ public interface ReflectionUtils {
                 return (Class<?>) typeArgument;
         }
         return null;
+    }
+
+    record MethodKey(Class<?> clazz, String name, List<Class<?>> parameterTypes) {
+        public MethodKey(Class<?> clazz, String name, Class<?>... parameterTypes) {
+            this(clazz, name, Arrays.asList(parameterTypes.clone()));
+        }
+    }
+
+    record FieldKey(Class<?> clazz, String name, boolean isStatic) {
+
+        public FieldKey(Class<?> clazz, String name) {
+            this(clazz, name, false);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package it.jakegblp.nms.impl.v1_21_3;
 
-import it.jakegblp.nms.api.NMSAdapter;
+import it.jakegblp.nms.api.AbstractNMS;
+import it.jakegblp.nms.api.adapters.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -28,12 +30,16 @@ import java.util.UUID;
 
 import static net.minecraft.network.syncher.EntityDataSerializers.*;
 
-public final class v1_21_3 extends NMSAdapter<
+public final class v1_21_3 extends AbstractNMS<
         EntityDataSerializer<?>
         > {
 
-    public v1_21_3() {
-        super();
+    public v1_21_3(JavaPlugin plugin, EntityTypeAdapter<?> entityTypeAdapter, MajorChangesAdapter<?, ?, ?, ?, ?, ?, ?, ?, ?> majorChangesAdapter, ResourceLocationAdapter<?> resourceLocationAdapter, EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter, EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter, PlayerRotationPacketAdapter playerRotationPacketAdapter, BundleDelimiterPacketAdapter<?> bundleDelimiterPacketAdapter) {
+        super(plugin, entityTypeAdapter, majorChangesAdapter, resourceLocationAdapter, entitySpawnPacketAdapter, entityMetadataPacketAdapter, playerRotationPacketAdapter, bundleDelimiterPacketAdapter);
+    }
+
+    @Override
+    public void init() {
         registerEntityDataSerializer(EntitySerializerInfo.normal(Byte.class), BYTE);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Integer.class), INT);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Long.class), LONG);
@@ -66,7 +72,5 @@ public final class v1_21_3 extends NMSAdapter<
         registerEntityDataSerializer(EntitySerializerInfo.normal(Vector3f.class), VECTOR3);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Quaternionf.class), QUATERNION);
     }
-
-
 
 }

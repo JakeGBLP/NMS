@@ -3,3 +3,5 @@ version: '1.0.0'
 main: it.jakegblp.nms.NMS
 api-version: '1.17'
 authors: [ JakeGBLP ]
+softdepend:
+  - Skript

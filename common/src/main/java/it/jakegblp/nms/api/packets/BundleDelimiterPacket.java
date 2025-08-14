@@ -5,7 +5,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-import static it.jakegblp.nms.api.NMSAdapter.NMS;
+import static it.jakegblp.nms.api.AbstractNMS.NMS;
 
 @Getter
 @Setter
@@ -20,6 +20,6 @@ public class BundleDelimiterPacket extends ClientboundPacket {
 
     @Override
     public Object asNMS() {
-        return NMS.bundleDelimiterPacketAdapter.to(this);
+        return NMS.bundleDelimiterPacketAdapter.toNMSBundleDelimiterPacket(this);
     }
 }

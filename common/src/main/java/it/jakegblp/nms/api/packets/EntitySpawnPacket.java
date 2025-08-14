@@ -1,33 +1,37 @@
 package it.jakegblp.nms.api.packets;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
-import java.util.Objects;
 import java.util.UUID;
 
-import static it.jakegblp.nms.api.NMSAdapter.NMS;
+import static it.jakegblp.nms.api.AbstractNMS.NMS;
 
 /**
  * <a href="https://minecraft.wiki/w/Java_Edition_protocol/Packets#Spawn_Entity">Entity Spawn Packet</a>
  */
 @Getter
 @Setter
-public class EntitySpawnPacket extends ClientboundPacket {
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+public class EntitySpawnPacket extends ClientboundPacketWithId {
 
-    private int entityId;
-    private UUID entityUUID;
-    private double x;
-    private double y;
-    private double z;
-    private float pitch;
-    private float yaw;
-    private EntityType entityType;
-    private int data;
-    private Vector velocity;
-    private double headYaw;
+    protected UUID entityUUID;
+    protected double x;
+    protected double y;
+    protected double z;
+    protected float pitch;
+    protected float yaw;
+    protected EntityType entityType;
+    protected int data;
+    protected Vector velocity;
+    protected double headYaw;
 
     public EntitySpawnPacket(
             int entityId,
@@ -41,7 +45,7 @@ public class EntitySpawnPacket extends ClientboundPacket {
             int data,
             Vector velocity,
             double headYaw) {
-        this.entityId = entityId;
+        super(entityId);
         this.entityUUID = entityUUID;
         this.x = x;
         this.y = y;
@@ -67,46 +71,6 @@ public class EntitySpawnPacket extends ClientboundPacket {
             Vector velocity) {
         this(id, entityUUID, x, y, z, pitch, yaw, entityType, data, velocity, 0);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (EntitySpawnPacket) obj;
-        return this.entityId == that.entityId &&
-                Objects.equals(this.entityUUID, that.entityUUID) &&
-                Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
-                Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
-                Double.doubleToLongBits(this.z) == Double.doubleToLongBits(that.z) &&
-                Float.floatToIntBits(this.pitch) == Float.floatToIntBits(that.pitch) &&
-                Float.floatToIntBits(this.yaw) == Float.floatToIntBits(that.yaw) &&
-                Objects.equals(this.entityType, that.entityType) &&
-                this.data == that.data &&
-                Objects.equals(this.velocity, that.velocity) &&
-                Double.doubleToLongBits(this.headYaw) == Double.doubleToLongBits(that.headYaw);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(entityId, entityUUID, x, y, z, pitch, yaw, entityType, data, velocity, headYaw);
-    }
-
-    @Override
-    public String toString() {
-        return "EntitySpawnPacket[" +
-                "id=" + entityId + ", " +
-                "entityUUID=" + entityUUID + ", " +
-                "x=" + x + ", " +
-                "y=" + y + ", " +
-                "z=" + z + ", " +
-                "pitch=" + pitch + ", " +
-                "yaw=" + yaw + ", " +
-                "entityType=" + entityType + ", " +
-                "data=" + data + ", " +
-                "velocity=" + velocity + ", " +
-                "headYaw=" + headYaw + ']';
-    }
-
 
     @Override
     public Object asNMS() {

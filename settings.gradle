@@ -1,10 +1,17 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+
 rootProject.name = 'NMS'
 
-// Include top-level modules
 include ':common'
 include ':factory'
+include ':skript'
 
-// Include NMS versions
 file('nms').listFiles()?.each { dir ->
     if (dir.isDirectory()) {
         def name = dir.name
@@ -12,3 +19,4 @@ file('nms').listFiles()?.each { dir ->
         project(":nms:$name").projectDir = dir
     }
 }
+

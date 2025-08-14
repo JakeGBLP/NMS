@@ -1,6 +1,7 @@
 package it.jakegblp.nms.impl.v1_19_1;
 
-import it.jakegblp.nms.api.NMSAdapter;
+import it.jakegblp.nms.api.AbstractNMS;
+import it.jakegblp.nms.api.adapters.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,18 +18,23 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.OptionalInt;
 import java.util.UUID;
 
 import static net.minecraft.network.syncher.EntityDataSerializers.*;
 
-public final class v1_19_1 extends NMSAdapter<
+public final class v1_19_1 extends AbstractNMS<
         EntityDataSerializer<?>
         > {
 
-    public v1_19_1() {
-        super();
+    public v1_19_1(JavaPlugin plugin, EntityTypeAdapter<?> entityTypeAdapter, MajorChangesAdapter<?, ?, ?, ?, ?, ?, ?, ?, ?> majorChangesAdapter, ResourceLocationAdapter<?> resourceLocationAdapter, EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter, EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter, PlayerRotationPacketAdapter playerRotationPacketAdapter, BundleDelimiterPacketAdapter<?> bundleDelimiterPacketAdapter) {
+        super(plugin, entityTypeAdapter, majorChangesAdapter, resourceLocationAdapter, entitySpawnPacketAdapter, entityMetadataPacketAdapter, playerRotationPacketAdapter, bundleDelimiterPacketAdapter);
+    }
+
+    @Override
+    public void init() {
         registerEntityDataSerializer(EntitySerializerInfo.normal(Byte.class), BYTE);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Integer.class), INT);
         registerEntityDataSerializer(EntitySerializerInfo.normal(Float.class), FLOAT);
@@ -53,7 +59,5 @@ public final class v1_19_1 extends NMSAdapter<
         registerEntityDataSerializer(EntitySerializerInfo.holder(PaintingVariant.class), PAINTING_VARIANT);
         registerEntityDataSerializer(EntitySerializerInfo.optional(GlobalPos.class), OPTIONAL_GLOBAL_POS);
     }
-
-
 
 }

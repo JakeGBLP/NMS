@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.entity.metadata;
 
-import it.jakegblp.nms.api.NMSObject;
+import it.jakegblp.nms.api.utils.NMSObject;
 
 /**
  * Abstract base class for handling entity flags, which works with any enum that represents flag values.
@@ -31,7 +31,7 @@ public abstract class Flags<T extends Enum<T> & BitFlag> implements NMSObject<By
     /**
      * Generic method to set the value of a flag.
      *
-     * @param flag The flag to set or clear
+     * @param flag  The flag to set or clear
      * @param value The value to set (true to set, false to clear)
      */
     public void setFlag(T flag, boolean value) {

@@ -3,25 +3,29 @@ package it.jakegblp.nms.impl.to_1_17_1;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import io.netty.buffer.Unpooled;
-import it.jakegblp.nms.api.*;
+import io.netty.channel.Channel;
+import it.jakegblp.nms.api.adapters.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import it.jakegblp.nms.api.entity.metadata.MetadataKey;
+import it.jakegblp.nms.api.packets.BlockDestructionPacket;
 import it.jakegblp.nms.api.packets.EntityMetadataPacket;
 import it.jakegblp.nms.api.packets.EntitySpawnPacket;
 import lombok.Getter;
-import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.PacketPlayOutBlockBreakAnimation;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherSerializer;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.phys.Vec3D;
@@ -34,26 +38,27 @@ import org.bukkit.entity.Pose;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static it.jakegblp.nms.api.NMSAdapter.NMS;
+import static it.jakegblp.nms.api.AbstractNMS.NMS;
 import static it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo.Type.OPTIONAL;
 
 @Getter
 public class To_1_17_1 implements
-        EntitySpawnPacketAdapter<PacketPlayOutSpawnEntity>, EntityTypeAdapter<EntityTypes<?>>,
+        EntitySpawnPacketAdapter<PacketPlayOutSpawnEntity>,
+        EntityTypeAdapter<EntityTypes>,
         EntityMetadataPacketAdapter<PacketPlayOutEntityMetadata>,
         ResourceLocationAdapter<MinecraftKey>,
-        ConversionAdapter<
+        MajorChangesAdapter<
                 Vec3D,
                 BlockPosition,
                 EntityPlayer,
                 EntityPose,
                 IChatBaseComponent,
-                Packet<?>
+                Packet,
+                PlayerConnection,
+                NetworkManager,
+                PacketPlayOutBlockBreakAnimation
                 > {
 
     private final BiMap<Pose, EntityPose> poseMap;
@@ -78,9 +83,24 @@ public class To_1_17_1 implements
     }
 
     @Override
-    @SuppressWarnings({"UnstableApiUsage"})
-    public IChatBaseComponent asNMSComponent(Component component) {
-        return (IChatBaseComponent) MinecraftComponentSerializer.get().serialize(component);
+    public EntitySpawnPacket fromNMSEntitySpawnPacket(PacketPlayOutSpawnEntity from) {
+        return new EntitySpawnPacket(
+                from.b(),
+                from.c(),
+                from.d(),
+                from.e(),
+                from.f(),
+                from.j(),
+                from.k(),
+                fromNMSEntityType(from.l()),
+                from.m(),
+                new Vector(from.g(), from.h(), from.i())
+        );
+    }
+
+    @Override
+    public Class<PacketPlayOutSpawnEntity> getNMSEntitySpawnPacketClass() {
+        return PacketPlayOutSpawnEntity.class;
     }
 
     @Override
@@ -89,17 +109,33 @@ public class To_1_17_1 implements
     }
 
     @Override
+    public void sendPacketInternal(PlayerConnection playerConnection, Packet packet) {
+        playerConnection.sendPacket(packet);
+    }
+
+    @Override
+    public NetworkManager getConnection(PlayerConnection playerConnection) {
+        return playerConnection.a;
+    }
+
+    @Override
+    public Channel getChannel(NetworkManager networkManager) {
+        return networkManager.k;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public PacketPlayOutEntityMetadata toNMSEntityMetadataPacket(EntityMetadataPacket<?, ?> from) {
+    public PacketPlayOutEntityMetadata toNMSEntityMetadataPacket(EntityMetadataPacket from) {
         PacketDataSerializer serializer = new PacketDataSerializer(Unpooled.buffer());
         serializer.d(from.getEntityId());
         List<DataWatcher.Item<?>> items = new ArrayList<>();
-        for (Map.Entry<MetadataKey<? extends Entity, ?>, Object> metadataKeyObjectEntry : from.getEntityMetadata()
-                .getMetadataItems()
+        for (Map.Entry<? extends MetadataKey<? extends Entity, ?>, Object> metadataKeyObjectEntry : from
+                .getEntityMetadata()
+                .metadataItems()
                 .entrySet()) {
             if (metadataKeyObjectEntry != null) {
                 MetadataKey<?, ?> key = metadataKeyObjectEntry.getKey();
-                Object nmsValue = NMS.asNMSObject(metadataKeyObjectEntry.getValue());
+                Object nmsValue = NMS.toNMSObject(metadataKeyObjectEntry.getValue());
                 EntitySerializerInfo.Type type = key.getEntitySerializerInfo().serializerType();
                 items.add(new DataWatcher.Item<>(
                         ((DataWatcherSerializer<Object>)
@@ -114,18 +150,50 @@ public class To_1_17_1 implements
     }
 
     @Override
+    public EntityMetadataPacket fromNMSEntityMetadataPacket(PacketPlayOutEntityMetadata from) {
+        List<DataWatcher.Item<?>> items = from.b();
+        if (items == null) return null;
+        Map<MetadataKey<? extends org.bukkit.entity.Entity, ?>, Object> metadata = new HashMap<>();
+        for (DataWatcher.Item<?> item : items) {
+            Object value = item.b();
+            metadata.put(new MetadataKey<>(org.bukkit.entity.Entity.class, item.a().a(), value), value);
+        }
+        return new EntityMetadataPacket(from.c(), metadata);
+    }
+
+    @Override
+    public Class<PacketPlayOutEntityMetadata> getNMSEntityMetadataPacketClass() {
+        return PacketPlayOutEntityMetadata.class;
+    }
+
+    @Override
     public EntityTypes<?> toNMSEntityType(EntityType from) {
-        return IRegistry.Y.get(asResourceLocation(from.getKey()));
+        return IRegistry.Y.get(toNMSNamespacedKey(from.getKey()));
     }
 
     @Override
-    public EntityType toEntityType(EntityTypes<?> to) {
-        return org.bukkit.Registry.ENTITY_TYPE.get(asNamespacedKey(IRegistry.Y.getKey(to)));
+    public EntityType fromNMSEntityType(EntityTypes to) {
+        return org.bukkit.Registry.ENTITY_TYPE.get(fromNMSNamespacedKey(IRegistry.Y.getKey(to)));
     }
 
     @Override
-    public MinecraftKey asResourceLocation(NamespacedKey namespacedKey) {
+    public Class<EntityTypes> getNMSEntityTypeClass() {
+        return EntityTypes.class;
+    }
+
+    @Override
+    public MinecraftKey toNMSNamespacedKey(NamespacedKey namespacedKey) {
         return new MinecraftKey(namespacedKey.getNamespace(), namespacedKey.getKey());
+    }
+
+    @Override
+    public Class<MinecraftKey> getNMSNamespacedKeyClass() {
+        return MinecraftKey.class;
+    }
+
+    @Override
+    public Class<Packet> getNMSPacketClass() {
+        return Packet.class;
     }
 
     @Override
@@ -186,7 +254,32 @@ public class To_1_17_1 implements
     }
 
     @Override
-    public void sendPacket(EntityPlayer entityPlayer, Packet<?> packet) {
-        entityPlayer.b.sendPacket(packet);
+    public PlayerConnection getPlayerConnection(EntityPlayer entityPlayer) {
+        return entityPlayer.b;
+    }
+
+    @Override
+    public IChatBaseComponent asNMSComponent(net.kyori.adventure.text.Component component) {
+        return IChatBaseComponent.ChatSerializer.a(GsonComponentSerializer.gson().serialize(component));
+    }
+
+    @Override
+    public net.kyori.adventure.text.Component asComponent(IChatBaseComponent component) {
+        return GsonComponentSerializer.gson().deserialize(IChatBaseComponent.ChatSerializer.a(component));
+    }
+
+    @Override
+    public PacketPlayOutBlockBreakAnimation toNMSBlockDestructionPacket(BlockDestructionPacket from) {
+        return new PacketPlayOutBlockBreakAnimation(from.getEntityId(), asNMSBlockVector(from.getPosition()), from.getBlockDestructionStage());
+    }
+
+    @Override
+    public BlockDestructionPacket fromNMSBlockDestructionPacket(PacketPlayOutBlockBreakAnimation from) {
+        return new BlockDestructionPacket(from.b(), asBlockVector(from.c()), from.d());
+    }
+
+    @Override
+    public Class<PacketPlayOutBlockBreakAnimation> getNMSBlockDestructionPacketClass() {
+        return PacketPlayOutBlockBreakAnimation.class;
     }
 }

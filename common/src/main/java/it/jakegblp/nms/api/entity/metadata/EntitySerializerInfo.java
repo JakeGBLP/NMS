@@ -11,12 +11,15 @@ public record EntitySerializerInfo(@NotNull Class<?> serializerClass, @NotNull T
     public static EntitySerializerInfo normal(@NotNull Class<?> serializationClass) {
         return new EntitySerializerInfo(serializationClass, Type.NORMAL);
     }
+
     public static EntitySerializerInfo optional(@NotNull Class<?> serializationClass) {
         return new EntitySerializerInfo(serializationClass, Type.OPTIONAL);
     }
+
     public static EntitySerializerInfo holder(@NotNull Class<?> serializationClass) {
         return new EntitySerializerInfo(serializationClass, Type.HOLDER);
     }
+
     public static EntitySerializerInfo list(@NotNull Class<?> serializationClass) {
         return new EntitySerializerInfo(serializationClass, Type.LIST);
     }
