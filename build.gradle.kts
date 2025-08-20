@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     java
     id("xyz.jpenilla.run-paper") version "2.3.1"
@@ -42,7 +44,7 @@ dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 }
 
-tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+tasks.named<ShadowJar>("shadowJar") {
     archiveClassifier.set("")
     relocate("dev.jorel.commandapi", "it.jakegblp.nms.libraries.commandapi")
     relocate("com.github.zafarkhaja.semver", "it.jakegblp.nms.libraries.semver")
@@ -65,8 +67,8 @@ subprojects {
 
     val specialCompileOnly by configurations.creating {
         isCanBeConsumed = false
-        isCanBeResolved = true // so we can use it for compilation
-        extendsFrom(configurations.compileOnly.get()) // inherits compileOnly behavior
+        isCanBeResolved = true
+        extendsFrom(configurations.compileOnly.get())
     }
 
     val versionRegex = Regex("""\d+\.\d+(?:\.\d+)?""")
@@ -111,6 +113,7 @@ subprojects {
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://repo.destroystokyo.com/repository/maven-public/")
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+        maven("https://libraries.minecraft.net")
     }
 
     dependencies {
@@ -129,6 +132,7 @@ subprojects {
                 }
             }
         }
+        compileOnly("com.mojang:datafixerupper:1.0.20")
         compileOnly("com.github.zafarkhaja:java-semver:0.10.2")
         compileOnly("io.netty:netty-all:4.1.87.Final")
         compileOnly("it.unimi.dsi:fastutil:8.5.15")
@@ -141,12 +145,10 @@ subprojects {
     }
 
     tasks.compileJava {
-        // Add special compile-only configuration to *only* the compile classpath
         classpath += specialCompileOnly
     }
 
     tasks.compileTestJava {
-        // If you want it available for tests too
         classpath += specialCompileOnly
     }
 }
