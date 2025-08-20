@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.events;
 
-import it.jakegblp.nms.api.packets.ServerboundPacket;
+import it.jakegblp.nms.api.packets.server.ServerboundPacket;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.Cancellable;
@@ -9,13 +9,18 @@ import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
-public class PacketReceiveEvent extends PacketEvent<ServerboundPacket> implements Cancellable {
+public class PacketReceiveEvent<P extends ServerboundPacket> extends PacketEvent<P> implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
     protected boolean cancelled;
 
-    public PacketReceiveEvent(ServerboundPacket packet) {
+    public PacketReceiveEvent(P packet) {
         super(packet);
+    }
+
+    @Override
+    public P getPacket() {
+        return super.getPacket();
     }
 
     public static HandlerList getHandlerList() {

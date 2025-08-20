@@ -1,0 +1,11 @@
+version: 1.0.0
+
+types:
+  packet: packet¦s @a
+  clientboundpacket: client bound packet¦s @a
+  clientbundlepacket: client bundle packet¦s @a
+  serverboundpacket: server bound packet¦s @a
+  entityspawnpacket: entity spawn packet¦s @an
+  entitymetadatapacket: entity metadata packet¦s @an
+  entitymetadata: entity metadata¦s @an
+  pose: pose¦s @a

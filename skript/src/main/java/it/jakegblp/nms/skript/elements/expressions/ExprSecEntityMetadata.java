@@ -11,7 +11,6 @@ import it.jakegblp.nms.api.entity.metadata.MetadataKey.Named;
 import it.jakegblp.nms.api.entity.metadata.MetadataKeyRegistries;
 import it.jakegblp.nms.skript.api.SimpleEntryValidator;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -34,19 +33,11 @@ public class ExprSecEntityMetadata extends SectionExpression<EntityMetadata> {
         });
         VALIDATOR = builder.build();
         Skript.registerExpression(ExprSecEntityMetadata.class, EntityMetadata.class, ExpressionType.SIMPLE,
-                "(an|[a] new) %entitytype% metadata [object]");
+                "[a] new %entitytype% metadata [object]");
     }
 
     private Expression<EntityType> entityTypeExpression;
     private Map<Named<? extends Entity, ?>, Expression<?>> expressionMap;
-
-    public static void debug(Map<Named<? extends Entity, ?>, Expression<?>> expressionMap, @Nullable Event event) {
-        StringBuilder builder = new StringBuilder("\n{");
-        for (var entry : expressionMap.entrySet()) {
-            builder.append("\n{\n\t\t\"").append(entry.getKey().getName()).append(": ").append(entry.getValue()).append(event == null ? "" : " -> " + entry.getValue().getSingle(event)).append(", ");
-        }
-        builder.append("}");
-    }
 
     public static Map<Named<? extends Entity, ?>, Expression<?>> getMetadataExpressionMap(
             Expression<EntityType> entityTypeExpression,
@@ -117,7 +108,6 @@ public class ExprSecEntityMetadata extends SectionExpression<EntityMetadata> {
         if (container == null) return false;
         entityTypeExpression = (Expression<EntityType>) expressions[0];
         expressionMap = getMetadataExpressionMap(entityTypeExpression, container);
-        debug(expressionMap, null);
         return expressionMap != null;
     }
 
@@ -125,10 +115,8 @@ public class ExprSecEntityMetadata extends SectionExpression<EntityMetadata> {
     protected EntityMetadata[] get(Event event) {
         EntityType entityType = entityTypeExpression.getSingle(event);
         if (entityType == null) return new EntityMetadata[0];
-
         Class<? extends Entity> type = entityType.data.getType();
         if (type == null) return new EntityMetadata[0];
-
         return new EntityMetadata[]{getMetadata(event, type, expressionMap)};
     }
 

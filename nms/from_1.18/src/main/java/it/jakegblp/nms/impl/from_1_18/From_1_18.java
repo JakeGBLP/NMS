@@ -4,7 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import io.netty.channel.Channel;
 import it.jakegblp.nms.api.adapters.MajorChangesAdapter;
-import it.jakegblp.nms.api.packets.BlockDestructionPacket;
+import it.jakegblp.nms.api.packets.client.BlockDestructionPacket;
 import lombok.Getter;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.BlockPos;
@@ -14,7 +14,9 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
@@ -22,7 +24,7 @@ import org.bukkit.util.Vector;
 
 @Getter
 public class From_1_18 implements
-        MajorChangesAdapter<Vec3, BlockPos, ServerPlayer, Pose, Component, Packet, ServerGamePacketListenerImpl, Connection, ClientboundBlockDestructionPacket> {
+        MajorChangesAdapter<EquipmentSlot, ItemStack, Vec3, BlockPos, ServerPlayer, Pose, Component, Packet, ServerGamePacketListenerImpl, Connection, ClientboundBlockDestructionPacket> {
 
     private final BiMap<org.bukkit.entity.Pose, Pose> poseMap;
 
@@ -33,6 +35,16 @@ public class From_1_18 implements
     @Override
     public Class<Packet> getNMSPacketClass() {
         return Packet.class;
+    }
+
+    @Override
+    public Class<ItemStack> getNMSItemStackClass() {
+        return ItemStack.class;
+    }
+
+    @Override
+    public Class<EquipmentSlot> getNMSEquipmentSlotClass() {
+        return EquipmentSlot.class;
     }
 
     @Override

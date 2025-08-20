@@ -1,7 +1,7 @@
-package it.jakegblp.nms.api.packets;
+package it.jakegblp.nms.api.packets.client;
 
 import it.jakegblp.nms.api.annotations.SinceMinecraft;
-import it.jakegblp.nms.api.utils.Exceptionable;
+import it.jakegblp.nms.api.packets.UnsupportedPacket;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,10 +16,10 @@ import static it.jakegblp.nms.api.AbstractNMS.NMS;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @SuperBuilder
 @SinceMinecraft(version = "1.21.2")
-public class PlayerRotationPacket extends ClientboundPacket implements Exceptionable<UnsupportedOperationException> {
+public class PlayerRotationPacket implements ClientboundPacket, UnsupportedPacket {
     protected float yaw, pitch;
 
     /**

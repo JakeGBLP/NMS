@@ -4,7 +4,7 @@ import it.jakegblp.nms.api.adapters.EntityMetadataPacketAdapter;
 import it.jakegblp.nms.api.adapters.EntityTypeAdapter;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import it.jakegblp.nms.api.entity.metadata.MetadataKey;
-import it.jakegblp.nms.api.packets.EntityMetadataPacket;
+import it.jakegblp.nms.api.packets.client.EntityMetadataPacket;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;

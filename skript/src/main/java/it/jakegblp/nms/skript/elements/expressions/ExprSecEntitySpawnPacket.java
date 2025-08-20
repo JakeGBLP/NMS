@@ -11,7 +11,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.TriggerItem;
 import ch.njol.util.Kleenean;
 import it.jakegblp.nms.api.NMSApi;
-import it.jakegblp.nms.api.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.EntitySpawnPacket;
 import it.jakegblp.nms.skript.api.SimpleEntryValidator;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
@@ -73,7 +73,7 @@ public class ExprSecEntitySpawnPacket extends SectionExpression<EntitySpawnPacke
         EntityType type = entityType.getSingle(event);
         if (type == null) return new EntitySpawnPacket[0];
         return new EntitySpawnPacket[]{new EntitySpawnPacket(
-                getExpressionValue(entityId, event, NMSApi.generateRandomId()).intValue(),
+                getExpressionValue(entityId, event, NMSApi.generateRandomId()),
                 getExpressionValue(entityUUID, event, UUID.randomUUID()),
                 loc.getX(),
                 loc.getY(),

@@ -1,7 +1,8 @@
-package it.jakegblp.nms.api.packets;
+package it.jakegblp.nms.api.packets.client;
 
 import it.jakegblp.nms.api.entity.metadata.EntityMetadata;
 import it.jakegblp.nms.api.entity.metadata.MetadataKey;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,24 +18,11 @@ import static it.jakegblp.nms.api.AbstractNMS.NMS;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public final class EntityMetadataPacket extends ClientboundPacketWithId {
+@AllArgsConstructor
+public final class EntityMetadataPacket implements ClientboundPacketWithId {
+    private int entityId;
     private Class<? extends Entity> target;
     private EntityMetadata entityMetadata;
-
-    /**
-     * @param id             the id of the entity whose metadata should be changed
-     * @param target         the bukkit class of the targeted entity
-     * @param entityMetadata the updated metadata
-     */
-    public EntityMetadataPacket(
-            int id,
-            Class<? extends Entity> target,
-            EntityMetadata entityMetadata
-    ) {
-        super(id);
-        this.target = target;
-        this.entityMetadata = entityMetadata;
-    }
 
     public EntityMetadataPacket(
             int id,

@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.adapters;
 
-import it.jakegblp.nms.api.packets.PlayerRotationPacket;
+import it.jakegblp.nms.api.packets.client.PlayerRotationPacket;
 
 public interface PlayerRotationPacketAdapter {
     Object toNMSPlayerRotationPacket(PlayerRotationPacket from);

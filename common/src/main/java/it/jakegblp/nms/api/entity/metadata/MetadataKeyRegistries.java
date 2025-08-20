@@ -76,10 +76,6 @@ public final class MetadataKeyRegistries {
 
     @UnmodifiableView
     public static Map<Class<? extends Entity>, List<MetadataKey.Named<?, ?>>> getRegistry() {
-        //    var value = entry.getValue();
-        //    return entry.getKey().getSimpleName() + ": [\n\t\t\t\t"+ value.stream()
-        //            .map(namedKey -> "{ name: \"" + namedKey.getName()+ "\", index: "+ namedKey.getIndex()+", value: "+namedKey.getValue()+" }").collect(Collectors.joining(",\n\t\t\t\t"))+"\n\t\t]";
-        //}).collect(Collectors.joining(",\n\t\t"))+"\n}");
         return Collections.unmodifiableMap(keysByClass);
     }
 

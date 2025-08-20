@@ -1,6 +1,7 @@
 package it.jakegblp.nms.api.utils;
 
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
@@ -13,7 +14,6 @@ public interface ReflectionUtils {
     Map<String, Class<?>> CACHED_CLASSES = new ConcurrentHashMap<>();
     Map<Class<?>, Constructor<?>> CACHED_CONSTRUCTORS = new ConcurrentHashMap<>();
     Map<MethodKey, Method> CACHED_METHODS = new ConcurrentHashMap<>();
-    Map<MethodKey, Method> CACHED_DECLARED_METHODS = new ConcurrentHashMap<>();
     Map<FieldKey, Field> CACHED_FIELDS = new ConcurrentHashMap<>();
     Map<FieldKey, Field> CACHED_DECLARED_FIELDS = new ConcurrentHashMap<>();
 
@@ -58,21 +58,12 @@ public interface ReflectionUtils {
         });
     }
 
-    static Method getMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
-        return CACHED_METHODS.computeIfAbsent(new MethodKey(clazz, name, parameterTypes), key -> {
+    static Method getMethod(Class<?> clazz, String name, @Nullable Boolean isStatic, @Nullable Boolean declared, Class<?>... parameterTypes) {
+        return CACHED_METHODS.computeIfAbsent(new MethodKey(clazz, name, isStatic, declared, parameterTypes), key -> {
             try {
-                return clazz.getMethod(name, parameterTypes);
-            } catch (NoSuchMethodException e) {
-                Bukkit.getLogger().severe("REFLECTION ERROR: " + e.getMessage());
+                Method method = (!Boolean.TRUE.equals(declared)) ? clazz.getMethod(name, parameterTypes) : clazz.getDeclaredMethod(name, parameterTypes);
+                if (isStatic == null || Modifier.isStatic(method.getModifiers()) == isStatic) return method;
                 return null;
-            }
-        });
-    }
-
-    static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
-        return CACHED_DECLARED_METHODS.computeIfAbsent(new MethodKey(clazz, name, parameterTypes), key -> {
-            try {
-                return clazz.getDeclaredMethod(name, parameterTypes);
             } catch (NoSuchMethodException e) {
                 Bukkit.getLogger().severe("REFLECTION ERROR: " + e.getMessage());
                 return null;
@@ -167,9 +158,9 @@ public interface ReflectionUtils {
         return null;
     }
 
-    record MethodKey(Class<?> clazz, String name, List<Class<?>> parameterTypes) {
-        public MethodKey(Class<?> clazz, String name, Class<?>... parameterTypes) {
-            this(clazz, name, Arrays.asList(parameterTypes.clone()));
+    record MethodKey(Class<?> clazz, String name, @Nullable Boolean isStatic, @Nullable Boolean declared, List<Class<?>> parameterTypes) {
+        public MethodKey(Class<?> clazz, String name, @Nullable Boolean isStatic, @Nullable Boolean declared, Class<?>... parameterTypes) {
+            this(clazz, name, isStatic, declared, Arrays.asList(parameterTypes.clone()));
         }
     }
 

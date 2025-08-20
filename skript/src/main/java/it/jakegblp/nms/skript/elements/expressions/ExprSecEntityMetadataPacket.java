@@ -11,9 +11,8 @@ import ch.njol.skript.lang.TriggerItem;
 import ch.njol.util.Kleenean;
 import it.jakegblp.nms.api.entity.metadata.EntityMetadata;
 import it.jakegblp.nms.api.entity.metadata.MetadataKey;
-import it.jakegblp.nms.api.packets.EntityMetadataPacket;
+import it.jakegblp.nms.api.packets.client.EntityMetadataPacket;
 import it.jakegblp.nms.skript.api.DynamicEntryData;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -24,8 +23,6 @@ import org.skriptlang.skript.lang.entry.util.ExpressionEntryData;
 import java.util.List;
 import java.util.Map;
 
-import static it.jakegblp.nms.skript.elements.expressions.ExprSecEntityMetadata.debug;
-
 public class ExprSecEntityMetadataPacket extends SectionExpression<EntityMetadataPacket> {
 
     private static final EntryValidator VALIDATOR;
@@ -35,7 +32,8 @@ public class ExprSecEntityMetadataPacket extends SectionExpression<EntityMetadat
                 .addEntryData(new ExpressionEntryData<>("id", null, false, Integer.class))
                 .addEntryData(new DynamicEntryData("metadata", EntityMetadata.class, ExprSecEntityMetadata.VALIDATOR))
                 .build();
-        Skript.registerExpression(ExprSecEntityMetadataPacket.class, EntityMetadataPacket.class, ExpressionType.SIMPLE, "(an|a new|new) %entitytype% metadata packet");
+        Skript.registerExpression(ExprSecEntityMetadataPacket.class, EntityMetadataPacket.class, ExpressionType.SIMPLE,
+                "[a] new %entitytype% metadata packet");
     }
 
     private Expression<Number> idExpression;
@@ -51,12 +49,10 @@ public class ExprSecEntityMetadataPacket extends SectionExpression<EntityMetadat
         if (container == null) return false;
         idExpression = (Expression<Number>) container.get("id", false);
         Object metadata = container.getOptional("metadata", false);
-        if (metadata instanceof EntryContainer entryContainer) {
+        if (metadata instanceof EntryContainer entryContainer)
             expressionMap = ExprSecEntityMetadata.getMetadataExpressionMap(entityTypeExpression, entryContainer);
-            debug(expressionMap, null);
-        } else {
+        else
             entityMetadataExpression = (Expression<EntityMetadata>) metadata;
-        }
         return true;
     }
 
@@ -68,7 +64,6 @@ public class ExprSecEntityMetadataPacket extends SectionExpression<EntityMetadat
         if (id == null) return new EntityMetadataPacket[0];
         EntityMetadata metadata;
         if (expressionMap != null) {
-            debug(expressionMap, event);
             metadata = ExprSecEntityMetadata.getMetadata(event, entityType.data.getType(), expressionMap);
         } else {
             metadata = entityMetadataExpression.getSingle(event);

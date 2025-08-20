@@ -1,7 +1,7 @@
 package it.jakegblp.nms.impl.from_1_18_to_1_18_2;
 
 import it.jakegblp.nms.api.adapters.EntitySpawnPacketAdapter;
-import it.jakegblp.nms.api.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.EntitySpawnPacket;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;

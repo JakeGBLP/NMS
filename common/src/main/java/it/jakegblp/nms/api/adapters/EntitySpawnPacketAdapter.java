@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.adapters;
 
-import it.jakegblp.nms.api.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.EntitySpawnPacket;
 
 public interface EntitySpawnPacketAdapter<
         NMSEntitySpawnPacket

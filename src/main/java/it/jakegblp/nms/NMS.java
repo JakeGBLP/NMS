@@ -13,9 +13,9 @@ import it.jakegblp.nms.api.entity.metadata.EntityMetadata;
 import it.jakegblp.nms.api.entity.metadata.MetadataKeyRegistries;
 import it.jakegblp.nms.api.entity.metadata.wrappers.EntityFlags;
 import it.jakegblp.nms.api.entity.metadata.wrappers.HandStates;
-import it.jakegblp.nms.api.packets.EntityMetadataPacket;
-import it.jakegblp.nms.api.packets.EntitySpawnPacket;
-import it.jakegblp.nms.api.packets.PlayerRotationPacket;
+import it.jakegblp.nms.api.packets.client.EntityMetadataPacket;
+import it.jakegblp.nms.api.packets.client.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.PlayerRotationPacket;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -65,6 +65,7 @@ public class NMS extends JavaPlugin {
 
         if (isPluginEnabled("Skript")) {
             addon = Skript.registerAddon(this);
+            addon.setLanguageFileDirectory("lang");
             try {
                 addon.loadClasses("it.jakegblp.nms.skript", "elements");
             } catch (IOException e) {

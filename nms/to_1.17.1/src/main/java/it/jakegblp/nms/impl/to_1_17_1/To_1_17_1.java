@@ -2,14 +2,17 @@ package it.jakegblp.nms.impl.to_1_17_1;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import it.jakegblp.nms.api.NMSApi;
 import it.jakegblp.nms.api.adapters.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
 import it.jakegblp.nms.api.entity.metadata.MetadataKey;
-import it.jakegblp.nms.api.packets.BlockDestructionPacket;
-import it.jakegblp.nms.api.packets.EntityMetadataPacket;
-import it.jakegblp.nms.api.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.BlockDestructionPacket;
+import it.jakegblp.nms.api.packets.client.EntityMetadataPacket;
+import it.jakegblp.nms.api.packets.client.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.SetEquipmentPacket;
 import lombok.Getter;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.BlockPosition;
@@ -19,6 +22,7 @@ import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketPlayOutBlockBreakAnimation;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityEquipment;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
 import net.minecraft.network.syncher.DataWatcher;
@@ -28,6 +32,8 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EnumItemSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_17_R1.util.CraftVector;
@@ -42,14 +48,19 @@ import java.util.*;
 
 import static it.jakegblp.nms.api.AbstractNMS.NMS;
 import static it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo.Type.OPTIONAL;
+import static it.jakegblp.nms.api.utils.StructureTranslation.fromMapToPairList;
+import static it.jakegblp.nms.api.utils.StructureTranslation.fromPairListToMap;
 
 @Getter
 public class To_1_17_1 implements
+        SetEquipmentPacketAdapter<PacketPlayOutEntityEquipment>,
         EntitySpawnPacketAdapter<PacketPlayOutSpawnEntity>,
         EntityTypeAdapter<EntityTypes>,
         EntityMetadataPacketAdapter<PacketPlayOutEntityMetadata>,
         ResourceLocationAdapter<MinecraftKey>,
         MajorChangesAdapter<
+                EnumItemSlot,
+                ItemStack,
                 Vec3D,
                 BlockPosition,
                 EntityPlayer,
@@ -197,6 +208,16 @@ public class To_1_17_1 implements
     }
 
     @Override
+    public Class<ItemStack> getNMSItemStackClass() {
+        return ItemStack.class;
+    }
+
+    @Override
+    public Class<EnumItemSlot> getNMSEquipmentSlotClass() {
+        return EnumItemSlot.class;
+    }
+
+    @Override
     public Vector asVector(Vec3D vec3D) {
         // Using craft classes usually errors when using different versions, here it's fine, but not future-proofed.
         return CraftVector.toBukkit(vec3D);
@@ -281,5 +302,22 @@ public class To_1_17_1 implements
     @Override
     public Class<PacketPlayOutBlockBreakAnimation> getNMSBlockDestructionPacketClass() {
         return PacketPlayOutBlockBreakAnimation.class;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public PacketPlayOutEntityEquipment toNMSSetEquipmentPacket(SetEquipmentPacket from) {
+        Object list = fromMapToPairList(from.getEquipment(), NMSApi::asNMSEquipmentSlot, NMSApi::asNMSItemStack);
+        return new PacketPlayOutEntityEquipment(from.getEntityId(), (List<Pair<EnumItemSlot, ItemStack>>) list);
+    }
+
+    @Override
+    public SetEquipmentPacket fromNMSSetEquipmentPacket(PacketPlayOutEntityEquipment from) {
+        return new SetEquipmentPacket(from.b(), fromPairListToMap(from.c(), NMSApi::asEquipmentSlot, NMSApi::asItemStack));
+    }
+
+    @Override
+    public Class<PacketPlayOutEntityEquipment> getNMSSetEquipmentPacketClass() {
+        return PacketPlayOutEntityEquipment.class;
     }
 }

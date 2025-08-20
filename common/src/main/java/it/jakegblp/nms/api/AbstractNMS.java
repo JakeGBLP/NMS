@@ -41,12 +41,24 @@ public abstract class AbstractNMS<
     @Delegate
     public final PlayerRotationPacketAdapter playerRotationPacketAdapter;
     @Delegate
-    public final BundleDelimiterPacketAdapter bundleDelimiterPacketAdapter;
+    public final ClientBundlePacketAdapter clientBundlePacketAdapter;
+    @Delegate
+    public final SetEquipmentPacketAdapter setEquipmentPacketAdapter;
     @Getter
     private JavaPlugin plugin;
 
 
-    public AbstractNMS(JavaPlugin plugin, EntityTypeAdapter<?> entityTypeAdapter, MajorChangesAdapter<?, ?, ?, ?, ?, ?, ?, ?, ?> majorChangesAdapter, ResourceLocationAdapter<?> resourceLocationAdapter, EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter, EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter, PlayerRotationPacketAdapter playerRotationPacketAdapter, BundleDelimiterPacketAdapter<?> bundleDelimiterPacketAdapter) {
+    public AbstractNMS(
+            JavaPlugin plugin,
+            EntityTypeAdapter<?> entityTypeAdapter,
+            MajorChangesAdapter majorChangesAdapter,
+            ResourceLocationAdapter<?> resourceLocationAdapter,
+            EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter,
+            EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter,
+            PlayerRotationPacketAdapter playerRotationPacketAdapter,
+            ClientBundlePacketAdapter<?> clientBundlePacketAdapter,
+            SetEquipmentPacketAdapter<?> setEquipmentPacketAdapter
+    ) {
         this.plugin = plugin;
         this.entityTypeAdapter = entityTypeAdapter;
         this.majorChangesAdapter = majorChangesAdapter;
@@ -54,7 +66,8 @@ public abstract class AbstractNMS<
         this.entitySpawnPacketAdapter = entitySpawnPacketAdapter;
         this.entityMetadataPacketAdapter = entityMetadataPacketAdapter;
         this.playerRotationPacketAdapter = playerRotationPacketAdapter;
-        this.bundleDelimiterPacketAdapter = bundleDelimiterPacketAdapter;
+        this.clientBundlePacketAdapter = clientBundlePacketAdapter;
+        this.setEquipmentPacketAdapter = setEquipmentPacketAdapter;
         Bukkit.getPluginManager().registerEvents(new InjectionListener(), plugin);
         init();
     }
@@ -148,8 +161,9 @@ public abstract class AbstractNMS<
      */
     public @Nullable Packet fromNMSPacket(@Nullable Object object) {
         if (object == null) return null;
+        else if (isNMSSetEquipmentPacket(object)) return fromNMSSetEquipmentPacket(object);
         else if (isNMSBlockDestructionPacket(object)) return fromNMSBlockDestructionPacket(object);
-        else if (isNMSBundleDelimiterPacket(object)) return fromNMSBundleDelimiterPacket(object);
+        else if (isNMSClientBundlePacket(object)) return fromNMSClientBundlePacket(object);
         else if (isNMSEntityMetadataPacket(object)) return fromNMSEntityMetadataPacket(object);
         else if (isNMSEntitySpawnPacket(object)) return fromNMSEntitySpawnPacket(object);
         else if (isNMSPlayerRotationPacket(object)) return fromNMSPlayerRotationPacket(object);

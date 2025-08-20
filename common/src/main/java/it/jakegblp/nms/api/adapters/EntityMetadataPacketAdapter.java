@@ -1,6 +1,6 @@
 package it.jakegblp.nms.api.adapters;
 
-import it.jakegblp.nms.api.packets.EntityMetadataPacket;
+import it.jakegblp.nms.api.packets.client.EntityMetadataPacket;
 
 public interface EntityMetadataPacketAdapter<NMSEntityMetadataPacket> {
     NMSEntityMetadataPacket toNMSEntityMetadataPacket(EntityMetadataPacket from);

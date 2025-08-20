@@ -1,66 +1,29 @@
 package it.jakegblp.nms.api;
 
 import it.jakegblp.nms.api.adapters.*;
+import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static it.jakegblp.nms.api.utils.ReflectionUtils.*;
 
-public class NMSBuilder<B extends NMSBuilder<B>> {
+@Setter
+public class NMSBuilder {
 
     private final int major, minor, patch;
     private JavaPlugin plugin;
     private EntityTypeAdapter<?> entityTypeAdapter;
-    private MajorChangesAdapter<?, ?, ?, ?, ?, ?, ?, ?, ?> majorChangesAdapter;
+    private MajorChangesAdapter majorChangesAdapter;
     private ResourceLocationAdapter<?> resourceLocationAdapter;
     private EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter;
     private EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter;
     private PlayerRotationPacketAdapter playerRotationPacketAdapter;
-    private BundleDelimiterPacketAdapter<?> bundleDelimiterPacketAdapter;
+    private ClientBundlePacketAdapter<?> clientBundlePacketAdapter;
+    private SetEquipmentPacketAdapter<?> setEquipmentPacketAdapter;
 
     public NMSBuilder(int major, int minor, int patch) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
-    }
-
-    public NMSBuilder(int major, int minor, int patch, JavaPlugin plugin) {
-        this(major, minor, patch);
-        this.plugin = plugin;
-    }
-
-    public NMSBuilder<B> entityTypeAdapter(EntityTypeAdapter<?> entityTypeAdapter) {
-        this.entityTypeAdapter = entityTypeAdapter;
-        return this;
-    }
-
-    public NMSBuilder<B> conversionAdapter(MajorChangesAdapter<?, ?, ?, ?, ?, ?, ?, ?, ?> majorChangesAdapter) {
-        this.majorChangesAdapter = majorChangesAdapter;
-        return this;
-    }
-
-    public NMSBuilder<B> resourceLocationAdapter(ResourceLocationAdapter<?> resourceLocationAdapter) {
-        this.resourceLocationAdapter = resourceLocationAdapter;
-        return this;
-    }
-
-    public NMSBuilder<B> entitySpawnPacketAdapter(EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter) {
-        this.entitySpawnPacketAdapter = entitySpawnPacketAdapter;
-        return this;
-    }
-
-    public NMSBuilder<B> entityMetadataPacketAdapter(EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter) {
-        this.entityMetadataPacketAdapter = entityMetadataPacketAdapter;
-        return this;
-    }
-
-    public NMSBuilder<B> playerRotationPacketAdapter(PlayerRotationPacketAdapter playerRotationPacketAdapter) {
-        this.playerRotationPacketAdapter = playerRotationPacketAdapter;
-        return this;
-    }
-
-    public NMSBuilder<B> bundleDelimiterPacketAdapter(BundleDelimiterPacketAdapter<?> bundleDelimiterPacketAdapter) {
-        this.bundleDelimiterPacketAdapter = bundleDelimiterPacketAdapter;
-        return this;
     }
 
     public AbstractNMS<?> build() {
@@ -75,7 +38,8 @@ public class NMSBuilder<B extends NMSBuilder<B>> {
                         EntitySpawnPacketAdapter.class,
                         EntityMetadataPacketAdapter.class,
                         PlayerRotationPacketAdapter.class,
-                        BundleDelimiterPacketAdapter.class
+                        ClientBundlePacketAdapter.class,
+                        SetEquipmentPacketAdapter.class
                 ),
                 plugin,
                 entityTypeAdapter,
@@ -84,7 +48,8 @@ public class NMSBuilder<B extends NMSBuilder<B>> {
                 entitySpawnPacketAdapter,
                 entityMetadataPacketAdapter,
                 playerRotationPacketAdapter,
-                bundleDelimiterPacketAdapter
+                clientBundlePacketAdapter,
+                setEquipmentPacketAdapter
         );
     }
 

@@ -9,7 +9,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
 import it.jakegblp.nms.api.NMSApi;
-import it.jakegblp.nms.api.packets.EntitySpawnPacket;
+import it.jakegblp.nms.api.packets.client.EntitySpawnPacket;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

@@ -4,14 +4,16 @@ import com.google.common.collect.BiMap;
 import io.netty.channel.*;
 import it.jakegblp.nms.api.events.PacketReceiveEvent;
 import it.jakegblp.nms.api.events.PacketSendEvent;
-import it.jakegblp.nms.api.packets.BlockDestructionPacket;
-import it.jakegblp.nms.api.packets.ClientboundPacket;
 import it.jakegblp.nms.api.packets.Packet;
-import it.jakegblp.nms.api.packets.ServerboundPacket;
+import it.jakegblp.nms.api.packets.client.BlockDestructionPacket;
+import it.jakegblp.nms.api.packets.client.ClientboundPacket;
+import it.jakegblp.nms.api.packets.server.ServerboundPacket;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -20,6 +22,8 @@ import static it.jakegblp.nms.api.AbstractNMS.NMS;
 import static it.jakegblp.nms.api.utils.ReflectionUtils.*;
 
 public interface MajorChangesAdapter<
+        NMSEquipmentSlot extends Enum<NMSEquipmentSlot>,
+        NMSItemStack,
         NMSVector,
         NMSBlockPos,
         NMSServerPlayer,
@@ -37,6 +41,35 @@ public interface MajorChangesAdapter<
     default boolean isNMSPacket(Object object) {
         return getNMSPacketClass().isInstance(object);
     }
+
+    default NMSEquipmentSlot asNMSEquipmentSlot(EquipmentSlot equipmentSlot) {
+        return Enum.valueOf(getNMSEquipmentSlotClass(), equipmentSlot == EquipmentSlot.HAND ? "MAINHAND" : equipmentSlot.name());
+    }
+
+    default EquipmentSlot asEquipmentSlot(NMSEquipmentSlot equipmentSlot) {
+        String name = equipmentSlot.name();
+        if (name.contains("MAIN"))
+            return EquipmentSlot.HAND;
+        return EquipmentSlot.valueOf(name);
+    }
+
+    @SuppressWarnings("unchecked")
+    default NMSItemStack asNMSItemStack(ItemStack itemStack) {
+        return (NMSItemStack) invokeSafely(getMethod(getCraftItemStackClass(), "asNMSCopy", true, true, ItemStack.class), null, itemStack);
+    }
+
+    default ItemStack asItemStack(NMSItemStack itemStack) {
+        return (ItemStack) invokeSafely(getMethod(getCraftItemStackClass(), "asBukkitCopy", true, true, getNMSItemStackClass()), null, itemStack);
+    }
+
+    @SuppressWarnings("unchecked")
+    default Class<? extends ItemStack> getCraftItemStackClass() {
+        return (Class<? extends ItemStack>) forClassName(CRAFT_BUKKIT_PACKAGE + ".inventory.CraftItemStack");
+    }
+
+    Class<NMSItemStack> getNMSItemStackClass();
+
+    Class<NMSEquipmentSlot> getNMSEquipmentSlotClass();
 
     BiMap<Pose, NMSPose> getPoseMap();
 
@@ -62,7 +95,7 @@ public interface MajorChangesAdapter<
 
     @SuppressWarnings("unchecked")
     default NMSServerPlayer asServerPlayer(Player player) {
-        return (NMSServerPlayer) invokeSafely(getDeclaredMethod(getCraftPlayerClass(), "getHandle"), player);
+        return (NMSServerPlayer) invokeSafely(getMethod(getCraftPlayerClass(), "getHandle", false, true), player);
     }
 
     Class<NMSServerPlayer> getNMSServerPlayerClass();
@@ -193,7 +226,7 @@ public interface MajorChangesAdapter<
 
             @Override
             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-                // Ignore disconnect-related noise
+                // todo: figure out if this is avoidable
                 if (cause instanceof java.nio.channels.ClosedChannelException) {
                     return;
                 }
