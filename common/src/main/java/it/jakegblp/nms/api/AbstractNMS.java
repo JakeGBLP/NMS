@@ -1,5 +1,6 @@
 package it.jakegblp.nms.api;
 
+import com.github.zafarkhaja.semver.Version;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -26,31 +27,43 @@ public abstract class AbstractNMS<
         EntityDataSerializer
         > {
 
-    public static AbstractNMS<?> NMS;
-    public final BiMap<EntitySerializerInfo, EntityDataSerializer> entityDataSerializerMap = HashBiMap.create();
+    protected static AbstractNMS<?> NMS;
+
+    protected final BiMap<EntitySerializerInfo, EntityDataSerializer> entityDataSerializerMap = HashBiMap.create();
     @Delegate
-    public final EntityTypeAdapter entityTypeAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final EntityTypeAdapter entityTypeAdapter;
     @Delegate
-    public final MajorChangesAdapter majorChangesAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final MajorChangesAdapter majorChangesAdapter;
     @Delegate
-    public final ResourceLocationAdapter resourceLocationAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final ResourceLocationAdapter resourceLocationAdapter;
     @Delegate
-    public final EntitySpawnPacketAdapter entitySpawnPacketAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final EntitySpawnPacketAdapter entitySpawnPacketAdapter;
     @Delegate
-    public final EntityMetadataPacketAdapter entityMetadataPacketAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final EntityMetadataPacketAdapter entityMetadataPacketAdapter;
     @Delegate
-    public final PlayerRotationPacketAdapter playerRotationPacketAdapter;
+    protected final PlayerRotationPacketAdapter playerRotationPacketAdapter;
     @Delegate
-    public final ClientBundlePacketAdapter clientBundlePacketAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final ClientBundlePacketAdapter clientBundlePacketAdapter;
     @Delegate
-    public final SetEquipmentPacketAdapter setEquipmentPacketAdapter;
+    @SuppressWarnings("rawtypes")
+    protected final SetEquipmentPacketAdapter setEquipmentPacketAdapter;
     @Getter
-    private JavaPlugin plugin;
+    protected final JavaPlugin plugin;
+    @Getter
+    protected final Version version;
 
 
     public AbstractNMS(
             JavaPlugin plugin,
+            Version version,
             EntityTypeAdapter<?> entityTypeAdapter,
+            @SuppressWarnings("rawtypes")
             MajorChangesAdapter majorChangesAdapter,
             ResourceLocationAdapter<?> resourceLocationAdapter,
             EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter,
@@ -60,6 +73,7 @@ public abstract class AbstractNMS<
             SetEquipmentPacketAdapter<?> setEquipmentPacketAdapter
     ) {
         this.plugin = plugin;
+        this.version = version;
         this.entityTypeAdapter = entityTypeAdapter;
         this.majorChangesAdapter = majorChangesAdapter;
         this.resourceLocationAdapter = resourceLocationAdapter;

@@ -1,5 +1,6 @@
 package it.jakegblp.nms.impl.v1_18_1;
 
+import com.github.zafarkhaja.semver.Version;
 import it.jakegblp.nms.api.AbstractNMS;
 import it.jakegblp.nms.api.adapters.*;
 import it.jakegblp.nms.api.entity.metadata.EntitySerializerInfo;
@@ -26,7 +27,7 @@ public final class v1_18_1 extends AbstractNMS<
         > {
 
     public v1_18_1(JavaPlugin plugin, EntityTypeAdapter<?> entityTypeAdapter, MajorChangesAdapter majorChangesAdapter, ResourceLocationAdapter<?> resourceLocationAdapter, EntitySpawnPacketAdapter<?> entitySpawnPacketAdapter, EntityMetadataPacketAdapter<?> entityMetadataPacketAdapter, PlayerRotationPacketAdapter playerRotationPacketAdapter, ClientBundlePacketAdapter<?> clientBundlePacketAdapter, SetEquipmentPacketAdapter<?> setEquipmentPacketAdapter) {
-        super(plugin, entityTypeAdapter, majorChangesAdapter, resourceLocationAdapter, entitySpawnPacketAdapter, entityMetadataPacketAdapter, playerRotationPacketAdapter, clientBundlePacketAdapter, setEquipmentPacketAdapter);
+        super(plugin, Version.of(1, 18, 1), entityTypeAdapter, majorChangesAdapter, resourceLocationAdapter, entitySpawnPacketAdapter, entityMetadataPacketAdapter, playerRotationPacketAdapter, clientBundlePacketAdapter, setEquipmentPacketAdapter);
     }
 
     @Override
