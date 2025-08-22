@@ -8,7 +8,7 @@ public class From_1_21_3 implements PlayerRotationPacketAdapter {
 
     @Override
     public Object toNMSPlayerRotationPacket(PlayerRotationPacket from) {
-        return new ClientboundPlayerRotationPacket(from.getPitch(), from.getYaw());
+        return new ClientboundPlayerRotationPacket(from.getYaw(), from.getPitch());
     }
 
     @Override
