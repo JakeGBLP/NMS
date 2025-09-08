@@ -1,11 +1,8 @@
-This library allows easy access to NMS (net.minecraft.server) code through a user-friendly interface.
+> [!IMPORTANT]
+> # » [Click Here](https://discord.gg/JdJWgRqbyr) to join the Official Support Discord Server
 
-This library is not guaranteed to work on all versions *yet*, proper support will be confirmed later on.
-Currently confirmed supported versions:
-
-- 1.21.1
-- 1.21.4
-
-Theoretically supported versions:
-
+Planned Support:
 - All versions from 1.17 to 1.21.7
+
+Unplanned Support:
+- Spigot (at least not for a very long time)
