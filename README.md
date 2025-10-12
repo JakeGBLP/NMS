@@ -1,3 +1,9 @@
+
+> [!IMPORTANT]
+> # This project has been MERGED into [Lusk](https://github.com/JakeGBLP/Lusk), it is not being discontinued!
+> ### Further details will be added there as progress is being made.
+
+
 > [!IMPORTANT]
 > # » [Click Here](https://discord.gg/JdJWgRqbyr) to join the Official Support Discord Server
 
